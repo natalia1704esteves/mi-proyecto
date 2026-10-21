@@ -1,0 +1,45 @@
+{% extends 'usuarios/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm p-4">
+        <h2><i class="fa-solid fa-magnifying-glass"></i> Buscar Cita del Estudiante</h2>
+        <p class="text-muted">Busca por nombre del estudiante o cédula del representante para autocompletar el informe.</p>
+
+        <!-- Formulario de búsqueda -->
+        <form method="GET" class="input-group mb-4">
+            <input type="hidden" name="tipo" value="{{ tipo_informe }}">
+            <input type="text" name="q" class="form-control" placeholder="Nombre del estudiante o cédula..." value="{{ query }}">
+            <button class="btn btn-primary" type="submit"><i class="fa-solid fa-search"></i> Buscar</button>
+        </form>
+
+        <!-- Resultados de citas -->
+        <div class="list-group">
+            {% if citas %}
+                {% for cita in citas %}
+                    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+                        <div>
+                            <h5 class="mb-1 text-dark">
+                                <i class="fa-solid fa-user-graduate text-info me-2"></i> 
+                                {{ cita.estudiante.nombre }} {{ cita.estudiante.apellido }}
+                            </h5>
+                            <p class="mb-1 text-muted small">
+                                <strong>Edad:</strong> {{ cita.estudiante.edad }} | 
+                                <strong>Grado/Sección:</strong> {{ cita.estudiante.grado }} - {{ cita.estudiante.seccion }} | 
+                                <strong>Representante:</strong> {{ cita.estudiante.representante.nombre }} (C.I: {{ cita.estudiante.representante.cedula }})
+                            </p>
+                            <small class="text-info"><i class="fa-regular fa-calendar"></i> Cita del: {{ cita.fecha }}</small>
+                        </div>
+                        <!-- Botón para seleccionar y pasar los datos a la creación de la bitácora -->
+                        <a href="{% url 'estudiantes:crear_bitacora' cita.id %}?tipo={{ tipo_informe }}" class="btn btn-success btn-sm">
+                            <i class="fa-solid fa-check"></i> Seleccionar y Crear
+                        </a>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted text-center py-4">No se encontraron citas registradas con ese criterio de búsqueda.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,309 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - SIGEP</title>
+    <link rel="icon" type="image/svg+xml" href="{% static 'usuarios/imagenes/favico.svg' %}">
+    <!-- FontAwesome para los íconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    </head>
+<body>
+
+<div class="login-bg-container">
+    <div class="login-bg-overlay"></div>
+
+    <div class="login-card">
+        <div class="login-header">
+            <div class="brand-title">
+                <i class="fa-solid fa-heart-pulse logo-icon"></i>
+                <h2>SIGEP</h2>
+            </div>
+            <div class="signup-link-top">
+                <span>¿No tienes cuenta?</span>
+                <a href="{% url 'registro' %}">Regístrate</a>
+            </div>
+        </div>
+
+        <div class="login-body">
+            <h3>Iniciar Sesión</h3>
+            <p class="subtitle">Bienvenido de nuevo al Sistema de Gestión Escolar y Psicopedagógica.</p>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div style="padding: 10px; margin-bottom: 15px; border-radius: 8px; font-size: 13px; background-color: rgba(254, 226, 226, 0.9); color: #dc2626; border: 1px solid #fca5a5;">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <div class="input-wrapper">
+                        <i class="fa-regular fa-envelope"></i>
+                        <input type="email" name="username" class="form-control" placeholder="correo@ejemplo.com" required autofocus>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <!-- Campo de contraseña con ID para manipularlo -->
+                        <input type="password" name="password" id="id_password" class="form-control" placeholder="••••••••" required>
+                        <!-- Botón del ojito -->
+                        <button type="button" class="toggle-password" id="togglePasswordBtn" onclick="togglePasswordVisibility()">
+                            <i class="fa-regular fa-eye" id="eyeIcon"></i>
+                        </button>
+                    </div>
+                    <div class="forgot-pass-wrapper">
+                        <a href="{% url 'password_reset' %}" class="forgot-link">¿Olvidaste tu contraseña?</a>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary">Ingresar</button>
+            </form>
+        </div>
+    </div>
+</div>
+    <style>
+        :root {
+            --primary-color: #0096a6;       /* Turquesa SIGEP */
+            --primary-hover: #007b88;
+            --card-bg: rgba(255, 255, 255, 0.65); /* Transparencia Glassmorphism */
+            --text-dark: #2c3e50;
+            --text-muted: #64748b;
+            --border-radius: 24px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .login-bg-container {
+            min-height: 100vh;
+            width: 100%;
+            background-image: url("{% static 'usuarios/imagenes/login_illustration.png' %}");
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 40px 8%;
+            position: relative;
+        }
+
+        .login-bg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.10);
+            z-index: 1;
+        }
+
+        .login-card {
+            position: relative;
+            z-index: 2;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: var(--border-radius);
+            padding: 45px 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .login-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .brand-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary-color);
+        }
+
+        .brand-title h2 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            font-size: 22px;
+        }
+
+        .signup-link-top {
+            font-size: 13px;
+        }
+
+        .signup-link-top span {
+            color: var(--text-muted);
+        }
+
+        .signup-link-top a {
+            color: var(--primary-color);
+            font-weight: 600;
+            text-decoration: none;
+            margin-left: 4px;
+        }
+
+        .login-body h3 {
+            font-size: 28px;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Icono de la izquierda (candado o sobre) */
+        .input-wrapper > i:first-child {
+            position: absolute;
+            left: 14px;
+            color: var(--text-muted);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 40px; /* Espacio para iconos a ambos lados */
+            border: 1.5px solid rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            outline: none;
+            background: rgba(255, 255, 255, 0.75);
+            color: var(--text-dark);
+        }
+
+        /* Si el input no lleva icono a la izquierda (por si acaso) */
+        .form-control.no-left-icon {
+            padding-left: 14px;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 150, 166, 0.2);
+        }
+
+        /* Estilo para el botón del ojito */
+        .toggle-password {
+            position: absolute;
+            right: 14px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 15px;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .toggle-password:hover {
+            color: var(--primary-color);
+        }
+
+        .forgot-pass-wrapper {
+            text-align: right;
+            margin-top: 6px;
+        }
+
+        .forgot-link {
+            font-size: 12px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 14px rgba(0, 150, 166, 0.35);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .login-bg-container {
+                justify-content: center;
+                padding: 20px;
+            }
+        }
+    </style>
+
+
+<!-- Script JavaScript para alternar la visibilidad de la contraseña -->
+<script>
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('id_password');
+        const eyeIcon = document.getElementById('eyeIcon');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            eyeIcon.classList.remove('fa-eye');
+            eyeIcon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            eyeIcon.classList.remove('fa-eye-slash');
+            eyeIcon.classList.add('fa-eye');
+        }
+    }
+</script>
+
+</body>
+</html>

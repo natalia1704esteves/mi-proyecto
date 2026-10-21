@@ -1,0 +1,139 @@
+{% extends 'usuarios/base_dashboard.html' %}
+
+{% block title %}Lista de Estudiantes - SIGEP{% endblock %}
+
+{% block content %}
+<style>
+    .table-container {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        border: 1px solid var(--border-color);
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    .header-flex {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .btn-action {
+        background: var(--primary);
+        color: #ffffff;
+        padding: 8px 16px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 13px;
+    }
+    .btn-action:hover {
+        background: var(--primary-dark);
+        color: #ffffff;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    th, td {
+        padding: 12px 14px;
+        text-align: left;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 14px;
+    }
+    th {
+        font-weight: 600;
+        color: var(--text-muted);
+        background: #fafafa;
+    }
+    td {
+        color: var(--text-main);
+    }
+    .acciones-btns {
+        display: flex;
+        gap: 8px;
+    }
+    .btn-edit {
+        background: #3b82f6;
+        color: white;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        text-decoration: none;
+    }
+    .btn-edit:hover {
+        background: #2563eb;
+        color: white;
+    }
+    .btn-delete {
+        background: #ef4444;
+        color: white;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        text-decoration: none;
+    }
+    .btn-delete:hover {
+        background: #dc2626;
+        color: white;
+    }
+</style>
+
+<div class="table-container">
+    <div class="header-flex">
+        <div>
+            <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 5px;">Estudiantes Registrados</h2>
+            <p style="font-size: 13px; color: var(--text-muted);">Listado general de los niños y niñas registrados en el sistema.</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <!-- Botón de retorno al inicio -->
+            <a href="{% url 'home' %}" class="btn-action" style="background: color-mix(in srgb, var(--primary) 80%, black 20%);" title="Ir al Inicio">
+                <i class="fa-solid fa-house"></i>
+            </a>
+            <a href="{% url 'estudiantes:registrar_estudiante' %}" class="btn-action">
+                <i class="fa-solid fa-plus"></i> Nuevo Estudiante
+            </a>
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Cédula / Código</th>
+                <th>Estudiante</th>
+                <th>Representante</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for est in estudiantes %}
+            <tr>
+                <td>{{ est.persona.cedula_persona }}</td>
+                <td>{{ est.persona.nombre }} {{ est.persona.apellido }}</td>
+                <td>
+                    {% if est.representante %}
+                        {{ est.representante.persona.nombre }} {{ est.representante.persona.apellido }}
+                    {% else %}
+                        <span style="color: var(--text-muted);">No asignado</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="acciones-btns">
+                        <a href="{% url 'estudiantes:editar_estudiante' est.id_estudiante %}" class="btn-edit"><i class="fa-solid fa-pen-to-square"></i> Editar</a>
+                        <a href="{% url 'estudiantes:eliminar_estudiante' est.id_estudiante %}" class="btn-delete" onclick="return confirm('¿Estás seguro de eliminar este registro?');"><i class="fa-solid fa-trash"></i> Eliminar</a>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center; color: var(--text-muted); padding: 30px;">
+                    No hay estudiantes registrados todavía.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

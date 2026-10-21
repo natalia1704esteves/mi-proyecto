@@ -1,0 +1,427 @@
+{% extends 'usuarios/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    /* =========================================
+        CORRECCIÓN DEL CONTENEDOR DE BASE.HTML
+        ========================================= */
+
+    body:has(.bitacora-page) {
+        display: block !important;
+        min-height: 100vh;
+        height: auto;
+        padding: 0 !important;
+        margin: 0;
+        background: #EBF4F8;
+    }
+
+    body:has(.bitacora-page) > .auth-container {
+        width: 100% !important;
+        max-width: none !important;
+        min-height: 100vh;
+        height: auto;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        text-align: left !important;
+        background: transparent !important;
+    }
+
+    .bitacora-page,
+    .bitacora-page * {
+        box-sizing: border-box;
+    }
+
+    .bitacora-page {
+        width: 100%;
+        max-width: 1600px;
+        margin: 0 auto;
+        padding: 32px 40px 48px;
+        color: #172b4d;
+    }
+
+    .bitacora-card {
+        width: 100%;
+        min-width: 0;
+        margin: 0 0 30px 0;
+        padding: 32px !important;
+        background: #ffffff;
+        border: 1px solid rgba(226, 232, 240, 0.85) !important;
+        border-radius: 20px !important;
+        box-shadow: 0 8px 30px rgba(31, 67, 91, 0.08) !important;
+        overflow: visible;
+    }
+
+    .bitacora-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 24px;
+        width: 100%;
+        margin-bottom: 30px;
+    }
+
+    .bitacora-heading {
+        flex: 1 1 auto;
+        min-width: 0;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    /* BOTÓN INICIO ESTILO TURQUESA SIGEP */
+    .btn-inicio {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        background-color: #0d7c8b;
+        color: #effbfd;
+        border-radius: 12px;
+        text-decoration: none;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+        border: 1px solid #b2dbe1;
+    }
+
+    .btn-inicio:hover {
+        background-color: #0097a7;
+        color: #ffffff;
+        border-color: #0097a7;
+        box-shadow: 0 4px 12px rgba(0, 151, 167, 0.25);
+    }
+
+    .bitacora-title {
+        margin: 0;
+        color: #172b4d;
+        font-size: 1.65rem;
+        font-weight: 700;
+        line-height: 1.35;
+        letter-spacing: -0.5px;
+    }
+
+    .bitacora-description {
+        margin: 8px 0 0;
+        color: #7b8798;
+        font-size: 0.94rem;
+        line-height: 1.7;
+    }
+
+    .dropdown-container {
+        position: relative;
+        display: inline-block;
+        flex: 0 0 auto;
+    }
+
+    .btn-crear-informe {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        padding: 12px 22px;
+        background: #0097a7 !important;
+        border: 1px solid #0097a7 !important;
+        border-radius: 50rem;
+        color: #ffffff !important;
+        font-size: 0.92rem;
+        font-weight: 600;
+        white-space: nowrap;
+        box-shadow: 0 5px 14px rgba(0, 151, 167, 0.23);
+        transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .btn-crear-informe:hover {
+        background: #007c8a !important;
+        border-color: #007c8a !important;
+        color: #ffffff !important;
+        box-shadow: 0 7px 18px rgba(0, 151, 167, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .custom-menu {
+        display: none;
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        min-width: 320px;
+        max-width: min(360px, calc(100vw - 32px));
+        padding: 8px 0;
+        background: #ffffff;
+        border: 1px solid #e6edf2;
+        border-radius: 14px;
+        box-shadow: 0 14px 35px rgba(22, 46, 66, 0.16);
+        z-index: 9999;
+        text-align: left;
+    }
+
+    .custom-menu.show {
+        display: block;
+        animation: bitacoraMenuIn 0.18s ease-out;
+    }
+
+    .custom-menu-item {
+        display: flex;
+        align-items: center;
+        padding: 13px 18px;
+        color: #334155 !important;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        text-decoration: none !important;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .custom-menu-item:hover {
+        background: #eff9fa;
+        color: #008b99 !important;
+    }
+
+    @keyframes bitacoraMenuIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .bitacora-search-row {
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+        margin-bottom: 18px;
+    }
+
+    .search-box-container {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        max-width: 360px;
+        padding: 5px 5px 5px 16px;
+        background: #f8fafc;
+        border: 1px solid #dce4eb;
+        border-radius: 50rem;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .search-box-container:focus-within {
+        border-color: #0097a7;
+        background: #ffffff;
+        box-shadow: 0 0 0 3px rgba(0, 151, 167, 0.1);
+    }
+
+    .search-box-container input {
+        flex: 1 1 auto;
+        padding: 7px 4px;
+        border: none !important;
+        outline: none !important;
+        background: transparent !important;
+        color: #334155;
+        font-size: 0.9rem;
+    }
+
+    .search-box-container button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border: none;
+        border-radius: 50%;
+        background: #0097a7;
+        color: #ffffff;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .search-box-container button:hover {
+        background: #007c8a;
+    }
+
+    .bitacora-table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        border: 1px solid #e7edf2;
+        border-radius: 13px;
+        background: #ffffff;
+    }
+
+    .informes-table {
+        width: 100% !important;
+        min-width: 1000px;
+        margin: 0 !important;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .informes-table thead th {
+        padding: 17px 18px;
+        background: #f5f8fb;
+        color: #60748a;
+        border: none;
+        border-bottom: 1px solid #e5ebf0;
+        font-size: 0.84rem;
+        font-weight: 600;
+        text-align: left;
+    }
+
+    .informes-table tbody td {
+        padding: 18px;
+        color: #273b53;
+        border: none;
+        border-bottom: 1px solid #edf1f5;
+        font-size: 0.9rem;
+        vertical-align: middle;
+    }
+
+    .informes-table tbody tr:hover td {
+        background: #f7fbfc;
+    }
+
+    .tipo-badge {
+        display: inline-block;
+        padding: 7px 11px;
+        background: #f0f7f9;
+        color: #087f8c;
+        border: 1px solid #d9edf0;
+        border-radius: 7px;
+        font-size: 0.82rem;
+        font-weight: 600;
+    }
+
+    .btn-accion-informe {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 9px 12px;
+        border: none;
+        border-radius: 8px;
+        color: #ffffff !important;
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-decoration: none !important;
+        transition: background 0.2s ease;
+    }
+
+    .btn-ver-informe { background: #0097a7; }
+    .btn-ver-informe:hover { background: #007f8d; }
+    .btn-editar-informe { background: #3d82f6; }
+    .btn-editar-informe:hover { background: #2563d8; }
+    .btn-eliminar-informe { background: #f04444; }
+    .btn-eliminar-informe:hover { background: #d93636; }
+
+    .estado-vacio {
+        padding: 65px 20px;
+        text-align: center;
+        background: #fbfdfe;
+        border: 1px dashed #dce5ec;
+        border-radius: 14px;
+    }
+</style>
+
+<div class="bitacora-page">
+
+    <!-- ========================================= -->
+    <!-- TARJETA 1: LISTADO DE INFORMES             -->
+    <!-- ========================================= -->
+    <div class="bitacora-card">
+
+        <div class="bitacora-header">
+            <div class="bitacora-heading">
+                <a href="{% url 'home' %}" class="btn-inicio" title="Ir a la vista principal">
+                    <i class="fa-solid fa-house"></i>
+                </a>
+                <div>
+                    <h3 class="bitacora-title">Bitácora de Informes</h3>
+                    <p class="bitacora-description">Listado general de los informes psicopedagógicos registrados en el sistema.</p>
+                </div>
+            </div>
+
+            <div class="dropdown-container" id="miDropdown">
+                <button class="btn btn-crear-informe" type="button" id="btnAccion">
+                    <i class="fa-solid fa-plus me-1"></i> Crear Informe <i class="fa-solid fa-chevron-down ms-1 small"></i>
+                </button>
+                <div class="custom-menu" id="menuDesplegable">
+                    <a class="custom-menu-item" href="{% url 'estudiantes:buscar_estudiante_bitacora' %}?tipo=integral">
+                        <i class="fa-solid fa-file-lines text-primary me-3 fs-5" style="width:24px;"></i> Informe Psicopedagógico Integral
+                    </a>
+                    <a class="custom-menu-item" href="{% url 'estudiantes:buscar_estudiante_bitacora' %}?tipo=especial">
+                        <i class="fa-solid fa-file-signature text-success me-3 fs-5" style="width:24px;"></i> Informe Psicopedagógico Especial
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="bitacora-search-row">
+            <form method="GET" class="search-box-container">
+                <input type="text" name="q" placeholder="Buscar informe..." value="{{ query }}">
+                <button type="submit" aria-label="Buscar informe"><i class="fa-solid fa-search"></i></button>
+            </form>
+        </div>
+
+        {% if bitacoras %}
+            <div class="bitacora-table-wrap">
+                <table class="table informes-table">
+                    <thead>
+                        <tr>
+                            <th>Cédula / Código</th>
+                            <th>Estudiante</th>
+                            <th>Tipo de Informe</th>
+                            <th>Fecha y Hora</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in bitacoras %}
+                            <tr>
+                                <td><span class="cedula-informe">{{ item.estudiante.persona.cedula_persona }}</span></td>
+                                <td><span class="estudiante-informe">{{ item.estudiante.persona.nombre }} {{ item.estudiante.persona.apellido }}</span></td>
+                                <td><span class="tipo-badge">{{ item.get_tipo_informe_display }}</span></td>
+                                <td><span class="fecha-informe">{{ item.fecha_creacion|date:"d/m/Y" }} - {{ item.fecha_creacion|time:"H:i" }}</span></td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a href="{% url 'estudiantes:ver_bitacora' item.id %}" class="btn-accion-informe btn-ver-informe"><i class="fa-solid fa-eye"></i> Ver</a>
+                                        <a href="{% url 'estudiantes:editar_bitacora' item.id %}" class="btn-accion-informe btn-editar-informe"><i class="fa-solid fa-pen-to-square"></i> Editar</a>
+                                        <a href="{% url 'estudiantes:eliminar_bitacora' item.id %}" class="btn-accion-informe btn-eliminar-informe"><i class="fa-solid fa-trash-can"></i> Eliminar</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="estado-vacio">
+                <div class="estado-vacio-icono"><i class="fa-regular fa-folder-open"></i></div>
+                <p>No hay bitácoras registradas todavía.</p>
+                <span>Haz clic en el botón de arriba para comenzar a redactar un informe.</span>
+            </div>
+        {% endif %}
+
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const btn = document.getElementById('btnAccion');
+        const menu = document.getElementById('menuDesplegable');
+
+        if (btn && menu) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                menu.classList.toggle('show');
+            });
+
+            menu.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+
+            window.addEventListener('click', function() {
+                menu.classList.remove('show');
+            });
+        }
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,509 @@
+
+{% extends 'usuarios/base_dashboard.html' %}
+
+{% load static %}
+
+{% block title %}Expedientes Multimedia - SIGEP{% endblock %}
+
+{% block content %}
+
+<style>
+    .expediente-main-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 36px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+    }
+
+    .btn-sigep-primary {
+        background: #0096a6;
+        color: white;
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 10px 22px;
+        border: none;
+        transition: background 0.2s ease;
+    }
+
+    .btn-sigep-primary:hover {
+        background: #007788;
+        color: white;
+    }
+
+    /* BOTÓN INICIO */
+    .btn-home-sigep {
+        background-color: #168687;
+        color: #f3f5fa;
+        border: 1px solid #cbe1de;
+        border-radius: 10px;
+        padding: 8px 14px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-home-sigep:hover {
+        background-color: #e6f4f6;
+        color: #0096a6;
+        border-color: #0096a6;
+    }
+
+    /* TARJETAS DE CARPETAS */
+    .card-carpeta-item {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-left: 5px solid #0096a6;
+        border-radius: 16px;
+        padding: 22px 28px;
+        margin-bottom: 28px;
+        transition: all 0.2s ease;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+    }
+
+    .card-carpeta-item:hover {
+        border-color: #0096a6;
+        box-shadow: 0 6px 18px rgba(0, 150, 166, 0.12);
+        transform: translateY(-2px);
+    }
+
+    .folder-icon-wrapper {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        background-color: #e6f4f6;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0096a6;
+    }
+
+    .folder-link-title {
+        color: #0f172a;
+        font-weight: 700;
+        font-size: 1.15rem;
+        text-decoration: none;
+        transition: color 0.2s ease;
+        text-transform: capitalize;
+    }
+
+    .folder-link-title:hover {
+        color: #0096a6;
+    }
+
+    .badge-cedula {
+        background-color: #f1f5f9;
+        color: #475569;
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 6px;
+        border: 1px solid #e2e8f0;
+    }
+
+    /* BOTONES DE ACCIÓN */
+    .btn-folder-action-edit {
+        background-color: #e6f4f6;
+        color: #0096a6;
+        border: 1px solid #b2dbe1;
+        border-radius: 10px;
+        padding: 8px 16px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .btn-folder-action-edit:hover {
+        background-color: #0096a6;
+        color: #ffffff;
+        border-color: #0096a6;
+    }
+
+    .btn-folder-action-delete {
+        background-color: #f8fafc;
+        color: #dc2626;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 8px 16px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .btn-folder-action-delete:hover {
+        background-color: #fee2e2;
+        border-color: #dc2626;
+        color: #b91c1c;
+    }
+
+    /* MODAL FLOTANTE */
+    .sigep-modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(4px);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .sigep-modal-content {
+        background: #ffffff;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 500px;
+        padding: 28px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    /* ESPACIADO ENTRE LAS SECCIONES */
+    .expediente-main-card > .mb-4:first-child {
+        margin-bottom: 28px !important;
+    }
+
+    .expediente-main-card > .mb-4:nth-child(2) {
+        margin-bottom: 30px !important;
+    }
+
+    .expediente-main-card > .card.p-4 {
+        margin-top: 12px !important;
+        margin-bottom: 32px !important;
+    }
+
+    .expediente-main-card > .card.p-4 form {
+        row-gap: 16px;
+    }
+
+    .expediente-main-card > form.mb-4 {
+        margin-top: 28px !important;
+        margin-bottom: 36px !important;
+    }
+
+    .expediente-main-card > .d-flex.align-items-center.gap-2 {
+        margin-top: 30px !important;
+        margin-bottom: 24px !important;
+    }
+
+    /* SEPARACIÓN ENTRE TARJETAS Y BOTONES */
+    .card-carpeta-item + .card-carpeta-item {
+        margin-top: 24px;
+    }
+
+    .card-carpeta-item > .d-flex.align-items-center.gap-2 {
+        gap: 14px !important;
+        flex-shrink: 0;
+    }
+
+    /* ADAPTACIÓN A PANTALLAS PEQUEÑAS */
+    @media (max-width: 768px) {
+        .expediente-main-card {
+            padding: 20px;
+        }
+
+        .card-carpeta-item {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .card-carpeta-item > .d-flex.align-items-center.gap-2 {
+            flex-wrap: wrap;
+        }
+
+        .card-carpeta-item > .d-flex.align-items-center.gap-2 a,
+        .card-carpeta-item > .d-flex.align-items-center.gap-2 button {
+            justify-content: center;
+        }
+    }
+</style>
+
+<div class="container-fluid p-0">
+    <div class="expediente-main-card">
+
+        <!-- BOTÓN INICIO -->
+        <div class="mb-4">
+            <a href="{% url 'home' %}"
+               class="btn-home-sigep"
+               title="Ir al Inicio">
+                <i class="fa-solid fa-house"></i>
+            </a>
+        </div>
+
+        <!-- ENCABEZADO -->
+        <div class="mb-4">
+            <h3 class="fw-bold m-0 mb-1" style="color: #0f172a;">
+                Módulo de Expedientes Multimedia
+            </h3>
+
+            <p class="text-muted m-0">
+                Gestión centralizada de carpetas digitales, informes y documentos estudiantiles.
+            </p>
+        </div>
+
+        <!-- CREAR NUEVO EXPEDIENTE -->
+        <div class="card p-4 mb-4 border-0 shadow-sm"
+             style="background-color: #f8fafc; border-radius: 16px;">
+
+            <label class="fw-semibold mb-3 d-block"
+                   style="font-size: 0.9rem; color: #334155;">
+                <i class="fa-solid fa-folder-plus text-success me-2"></i>
+                Crear Nuevo Expediente Digital
+            </label>
+
+            <form method="POST" class="row g-3 align-items-center">
+                {% csrf_token %}
+
+                <input type="hidden" name="accion" value="crear_expediente">
+
+                <div class="col-md-9">
+                    <select name="bitacora_id"
+                            class="form-select"
+                            required
+                            style="border-radius: 10px; padding: 12px; border: 1px solid #cbd5e1;">
+
+                        <option value="" selected disabled>
+                            -- Selecciona un Informe Psicopedagógico Existente --
+                        </option>
+
+                        {% for inf in informes_disponibles %}
+                            <option value="{{ inf.pk }}">
+                                {{ inf.estudiante.persona.nombre }}
+                                {{ inf.estudiante.persona.apellido }}
+                                - (C.I: {{ inf.estudiante.persona.cedula_persona|default:"Sin CI" }})
+                                - {{ inf.get_tipo_informe_display }}
+                            </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <button type="submit"
+                            class="btn btn-sigep-primary w-100 py-2">
+                        Crear Expediente
+                    </button>
+                </div>
+            </form>
+        </div>
+
+      
+        
+<!-- BUSCADOR -->
+<form method="GET" class="mb-4" style="width: 100%; max-width: 700px;">
+    <div class="input-group shadow-sm"
+         style="display: flex; flex-wrap: nowrap; width: 100%;">
+
+        <input
+            type="text"
+            name="q"
+            value="{{ query }}"
+            class="form-control"
+            placeholder="Buscar expediente por estudiante o C.I..."
+            style="flex: 1 1 auto; width: 1%; min-width: 0; height: 48px; padding: 10px 16px; border: 1px solid #cbd5e1; border-radius: 10px 0 0 10px;"
+        >
+
+        <button
+            type="submit"
+            class="btn"
+            title="Buscar expediente"
+            style="flex: 0 0 54px; height: 48px; background-color: #e6f4f6; color: #0096a6; border: 1px solid #0096a6; border-radius: 0 10px 10px 0;"
+        >
+            <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+
+    </div>
+</form>
+
+
+
+        <!-- TÍTULO DE CARPETAS -->
+        <div class="d-flex align-items-center gap-2 mb-3 mt-4">
+            <h6 class="fw-bold m-0"
+                style="color: #0f172a; font-size: 1.05rem;">
+                Carpetas de Estudiantes
+            </h6>
+        </div>
+
+        <!-- LISTADO DE CARPETAS -->
+        <div class="row">
+            <div class="col-12">
+
+                {% for est in estudiantes %}
+
+                    <div class="card-carpeta-item">
+
+                        <!-- INFORMACIÓN DEL ESTUDIANTE -->
+                        <div class="d-flex align-items-center gap-3">
+
+                            <div class="folder-icon-wrapper">
+                                <i class="fa-solid fa-folder-closed fa-xl"></i>
+                            </div>
+
+                            <div>
+                                <a href="{% url 'estudiantes:detalle_expediente_estudiante' est.pk %}"
+                                   class="folder-link-title">
+                                    Carpeta de {{ est.persona.nombre }} {{ est.persona.apellido }}
+                                </a>
+
+                                <div class="mt-2">
+                                    <span class="badge-cedula">
+                                        <i class="fa-regular fa-id-card me-1"></i>
+                                        C.I: {{ est.persona.cedula_persona|default:"Sin Cédula" }}
+                                    </span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- BOTONES DE ACCIÓN -->
+                        <div class="d-flex align-items-center gap-2">
+
+                            <a href="{% url 'estudiantes:detalle_expediente_estudiante' est.pk %}"
+                               class="btn-folder-action-edit"
+                               title="Abrir / Editar Carpeta">
+                                <i class="fa-solid fa-folder-open"></i>
+                                Abrir Carpeta
+                            </a>
+
+                            <button type="button"
+                                    class="btn-folder-action-delete"
+                                    title="Eliminar Carpeta"
+                                    onclick="abrirModalEliminarCarpeta('{{ est.pk }}', '{{ est.persona.nombre|escapejs }} {{ est.persona.apellido|escapejs }}')">
+                                <i class="fa-solid fa-trash"></i>
+                                Eliminar
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                {% empty %}
+
+                    <div class="text-center py-5 text-muted">
+                        <i class="fa-regular fa-folder-open mb-3 d-block"
+                           style="font-size: 3rem; color: #94a3b8;"></i>
+
+                        <span style="font-size: 1rem;">
+                            No hay carpetas de expedientes creadas todavía.
+                        </span>
+                    </div>
+
+                {% endfor %}
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- MODAL ELIMINAR CARPETA COMPLETA -->
+<div class="sigep-modal-overlay" id="modalEliminarCarpeta">
+
+    <div class="sigep-modal-content">
+
+        <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+
+            <h5 class="fw-bold text-danger m-0">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                Eliminar Carpeta Digital
+            </h5>
+
+            <button type="button"
+                    class="btn-close"
+                    onclick="cerrarSigepModal('modalEliminarCarpeta')">
+            </button>
+
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <input type="hidden" name="accion" value="eliminar_carpeta">
+
+            <input type="hidden"
+                   name="estudiante_id"
+                   id="delete_estudiante_id">
+
+            <p class="text-muted my-3">
+                ¿Estás seguro de eliminar la carpeta digital de
+                <strong id="delete_estudiante_nombre"></strong>
+                y todos sus archivos asociados?
+            </p>
+
+            <div class="d-flex justify-content-end gap-2 pt-2">
+
+                <button type="button"
+                        class="btn btn-light px-3"
+                        onclick="cerrarSigepModal('modalEliminarCarpeta')">
+                    Cancelar
+                </button>
+
+                <button type="submit"
+                        class="btn btn-danger px-4"
+                        style="border-radius: 10px;">
+                    Sí, Eliminar Carpeta
+                </button>
+
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    function abrirSigepModal(id) {
+        var modal = document.getElementById(id);
+
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+
+    function cerrarSigepModal(id) {
+        var modal = document.getElementById(id);
+
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    function abrirModalEliminarCarpeta(id, nombre) {
+        document.getElementById('delete_estudiante_id').value = id;
+
+        document.getElementById('delete_estudiante_nombre').innerText = nombre;
+
+        abrirSigepModal('modalEliminarCarpeta');
+    }
+
+    window.onclick = function(event) {
+        if (event.target.classList.contains('sigep-modal-overlay')) {
+            event.target.style.display = 'none';
+        }
+    };
+</script>
+
+{% endblock %}

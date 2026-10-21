@@ -1,0 +1,444 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Cita - SIGEP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --primary-hover: #0b5ed7;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #212529;
+            --border-color: #dee2e6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            background: var(--card-bg);
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.95rem;
+        }
+
+        .search-container {
+            position: relative;
+        }
+
+        .search-input-wrapper {
+            display: flex;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: #fff;
+            padding: 0 12px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .search-input-wrapper:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+        }
+
+        .search-input-wrapper i {
+            color: #6c757d;
+            margin-right: 10px;
+        }
+
+        .form-control-search {
+            width: 100%;
+            padding: 10px 0;
+            border: none;
+            font-size: 1rem;
+            outline: none;
+            background: transparent;
+        }
+
+        .search-results-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            display: none;
+            margin-top: 4px;
+        }
+
+        .search-result-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f3f5;
+            font-size: 0.9rem;
+        }
+
+        .search-result-item:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+        .form-control-custom, input[type="date"], input[type="time"], textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+            background-color: #fff;
+        }
+
+        .form-control-custom:focus, input[type="date"]:focus, input[type="time"]:focus, textarea:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.15);
+        }
+
+        .form-control-short {
+            max-width: 220px !important;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .estado-options {
+            display: flex;
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .estado-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background-color: #f8f9fa;
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .estado-chip:hover {
+            background-color: #e9ecef;
+        }
+
+        .estado-chip input[type="radio"] {
+            accent-color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .student-ficha {
+            background-color: #f8f9fa;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .student-ficha h4 {
+            margin: 0 0 12px 0;
+            font-size: 0.95rem;
+            color: #495057;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ficha-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            font-size: 0.9rem;
+        }
+
+        .ficha-item span {
+            font-weight: 600;
+            color: #6c757d;
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .ficha-item strong {
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 30px;
+        }
+
+        .btn-submit {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-cancel {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .btn-cancel:hover {
+            background-color: #5c636a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2><i class="fa-solid fa-calendar-plus"></i> Agendar Nueva Cita</h2>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <!-- Campo de Búsqueda Interactiva -->
+            <div class="form-group search-container">
+                <label for="input-buscador">Buscar Estudiante (Cédula o Nombre):</label>
+                <div class="search-input-wrapper">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="input-buscador" class="form-control-search" placeholder="Escriba la cédula o nombre para buscar..." autocomplete="off">
+                </div>
+                
+                <!-- Select oculto procesado por Django -->
+                <div style="display: none;">
+                    {{ form.id_inscripcion }}
+                </div>
+                
+                <div id="resultados-busqueda" class="search-results-dropdown"></div>
+                {{ form.id_inscripcion.errors }}
+            </div>
+
+            <!-- Ficha no editable con los datos del estudiante -->
+            <div id="student-ficha" class="student-ficha">
+                <h4><i class="fa-solid fa-user-check" style="color: var(--primary-color);"></i> Datos del Estudiante Seleccionado</h4>
+                <div class="ficha-grid">
+                    <div class="ficha-item">
+                        <span>Cédula:</span>
+                        <strong id="ficha-cedula">-</strong>
+                    </div>
+                    <div class="ficha-item">
+                        <span>Nombre y Apellido:</span>
+                        <strong id="ficha-nombre">-</strong>
+                    </div>
+                    <div class="ficha-item">
+                        <span>Grado y Sección:</span>
+                        <strong id="ficha-grado">-</strong>
+                    </div>
+                    <div class="ficha-item">
+                        <span>Escuela:</span>
+                        <strong id="ficha-escuela">-</strong>
+                    </div>
+                    <div class="ficha-item" style="grid-column: span 2;">
+                        <span>Período Académico:</span>
+                        <strong id="ficha-periodo">-</strong>
+                    </div>
+                </div>
+            </div>
+<!-- Fecha -->
+            <div class="form-group">
+                <label for="{{ form.fecha_cita.id_for_label }}">Fecha cita:</label>
+                {{ form.fecha_cita }}
+                {{ form.fecha_cita.errors }}
+            </div>
+
+            <!-- Hora -->
+            <div class="form-group">
+                <label for="{{ form.hora.id_for_label }}">Hora:</label>
+                {{ form.hora }}
+                {{ form.hora.errors }}
+            </div>
+
+           <!-- Estado de la cita -->
+            <div class="form-group">
+                <label>Estado cita:</label>
+                <div class="estado-options">
+                    {% for radio in form.estado_cita %}
+                        <label class="estado-chip">
+                            {{ radio.tag }} {{ radio.choice_label }}
+                        </label>
+                    {% endfor %}
+                </div>
+                {{ form.estado_cita.errors }}
+            </div>
+
+            
+            <!-- Motivo -->
+            <div class="form-group">
+                {{ form.motivo_cita.label_tag }}
+                {{ form.motivo_cita }}
+                {{ form.motivo_cita.errors }}
+            </div>
+
+            <div class="btn-container">
+                <a href="{% url 'estudiantes:listar_citas' %}" class="btn-cancel">Cancelar</a>
+                <button type="submit" class="btn-submit">Guardar Cita</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const realSelect = document.querySelector('select[name="id_inscripcion"]') || document.getElementById('id_id_inscripcion');
+            const inputBuscador = document.getElementById('input-buscador');
+            const dropdown = document.getElementById('resultados-busqueda');
+            const ficha = document.getElementById('student-ficha');
+
+            const lblCedula = document.getElementById('ficha-cedula');
+            const lblNombre = document.getElementById('ficha-nombre');
+            const lblGrado = document.getElementById('ficha-grado');
+            const lblEscuela = document.getElementById('ficha-escuela');
+            const lblPeriodo = document.getElementById('ficha-periodo');
+
+            if (!realSelect) {
+                console.error("No se encontró el select real de inscripción en el DOM.");
+                return;
+            }
+
+            const opcionesEstudiantes = [];
+            for (let i = 0; i < realSelect.options.length; i++) {
+                const opt = realSelect.options[i];
+                if (opt.value) {
+                    opcionesEstudiantes.push({
+                        value: opt.value,
+                        text: opt.text
+                    });
+                }
+            }
+
+            inputBuscador.addEventListener('input', function() {
+                const query = this.value.toLowerCase().trim();
+                dropdown.innerHTML = '';
+
+                if (query.length === 0) {
+                    dropdown.style.display = 'none';
+                    return;
+                }
+
+                const filtrados = opcionesEstudiantes.filter(item => item.text.toLowerCase().includes(query));
+
+                if (filtrados.length > 0) {
+                    filtrados.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'search-result-item';
+                        div.textContent = item.text;
+                        div.addEventListener('click', function() {
+                            realSelect.value = item.value;
+                            inputBuscador.value = item.text;
+                            dropdown.style.display = 'none';
+
+                            const textoCompleto = item.text;
+                            const partes = textoCompleto.split(' - ');
+                            if (partes.length >= 2) {
+                                lblCedula.textContent = partes[0].trim();
+                                lblNombre.textContent = partes[1].trim();
+
+                                const resto = partes.slice(2).join(' - ');
+
+                                if (resto.includes('No Escolarizado')) {
+                                    lblGrado.textContent = 'No aplica';
+                                    lblEscuela.textContent = 'No escolarizado';
+                                    
+                                    const matchPeriodo = resto.match(/\(([^)]+)\)/);
+                                    lblPeriodo.textContent = matchPeriodo ? matchPeriodo[1] : 'No asignado';
+                                } else {
+                                    const subPartes = resto.split(' en ');
+                                    lblGrado.textContent = subPartes[0] ? subPartes[0].trim() : 'N/D';
+                                    lblEscuela.textContent = subPartes[1] ? subPartes[1].trim() : 'N/D';
+                                    lblPeriodo.textContent = "Periodo activo actual"; 
+                                }
+                            }
+
+                            ficha.style.display = 'block';
+                        });
+                        dropdown.appendChild(div);
+                    });
+                    dropdown.style.display = 'block';
+                } else {
+                    const div = document.createElement('div');
+                    div.className = 'search-result-item';
+                    div.style.color = '#6c757d';
+                    div.textContent = 'No se encontraron estudiantes coincidentes.';
+                    dropdown.appendChild(div);
+                    dropdown.style.display = 'block';
+                }
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!inputBuscador.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

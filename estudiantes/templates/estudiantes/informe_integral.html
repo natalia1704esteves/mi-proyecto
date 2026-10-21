@@ -1,0 +1,63 @@
+{% extends 'usuarios/base.html' %}
+{% load static %}
+{% block content %}
+<div class="container mt-4">
+    <!-- Encabezado con el botón CREAR -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fa-solid fa-book-open"></i> Bienvenida a Bitácora</h2>
+            <p class="text-muted">Gestiona y crea los informes psicopedagógicos de los estudiantes.</p>
+        </div>
+        
+        <!-- Botón CREAR con menú desplegable -->
+        <div class="dropdown">
+            <button class="btn btn-primary btn-lg dropdown-toggle shadow" type="button" id="dropdownCrearInforme" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fa-solid fa-plus-circle me-1"></i> Crear
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="dropdownCrearInforme">
+                <li><h6 class="dropdown-header">Seleccione el Tipo de Informe</h6></li>
+                <li><a class="dropdown-item py-2" href="{% url 'estudiantes:elegir_origen_datos' %}?tipo=integral"><i class="fa-solid fa-file-lines text-primary me-2"></i> Informe Psicopedagógico Integral</a></li>
+                <li><a class="dropdown-item py-2" href="{% url 'estudiantes:elegir_origen_datos' %}?tipo=compromiso"><i class="fa-solid fa-file-contract text-warning me-2"></i> Acta de Compromiso del Representante</a></li>
+                <li><a class="dropdown-item py-2" href="{% url 'estudiantes:elegir_origen_datos' %}?tipo=final"><i class="fa-solid fa-file-circle-check text-success me-2"></i> Informe Integral Final</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Listado de Informes Creados -->
+    <div class="card shadow-sm p-4">
+        <h4 class="mb-3">Informes Registrados</h4>
+        <hr>
+        {% if bitacoras %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Estudiante</th>
+                            <th>Tipo de Informe</th>
+                            <th>Fecha</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for bitacora in bitacoras %}
+                        <tr>
+                            <td>{{ bitacora.estudiante.persona.nombre }} {{ bitacora.estudiante.persona.apellido }}</td>
+                            <td>{{ bitacora.get_tipo_display|default:"Informe Integral" }}</td>
+                            <td>{{ bitacora.fecha_creacion|date:"d/m/Y" }}</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-eye"></i> Ver</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <p class="text-muted italic mb-2">No hay bitácoras registradas todavía.</p>
+                <p class="text-muted small">Haz clic en el botón superior <strong>Crear</strong> para redactar un nuevo informe.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

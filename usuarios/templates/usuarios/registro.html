@@ -1,0 +1,103 @@
+{% extends 'usuarios/base.html' %}
+{% load static %}
+
+{% block title %}Registrar Nuevo Personal - SIGEP{% endblock %}
+
+{% block content %}
+<form method="POST">
+    {% csrf_token %}
+
+    <!-- 1. Cédula -->
+    <div class="form-group">
+        <label>Cédula</label>
+        <div class="input-wrapper">
+            <i class="fa-regular fa-id-card"></i>
+            <input type="text" name="cedula" class="form-control" placeholder="Ej: 12345678" maxlength="8" pattern="\d*" required>
+        </div>
+    </div>
+
+    <!-- 2. Nombre y Apellido -->
+    <div style="display: flex; gap: 10px;">
+        <div class="form-group" style="flex: 1;">
+            <label>Nombre</label>
+            <div class="input-wrapper">
+                <i class="fa-regular fa-user"></i>
+                <input type="text" name="nombre" class="form-control" placeholder="Nombre" required>
+            </div>
+        </div>
+        <div class="form-group" style="flex: 1;">
+            <label>Apellido</label>
+            <div class="input-wrapper">
+                <i class="fa-regular fa-user"></i>
+                <input type="text" name="apellido" class="form-control" placeholder="Apellido" required>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Correo Electrónico -->
+    <div class="form-group">
+        <label>Correo Electrónico (Será su usuario)</label>
+        <div class="input-wrapper">
+            <i class="fa-regular fa-envelope"></i>
+            <input type="email" name="email" class="form-control" placeholder="correo@ejemplo.com" required>
+        </div>
+    </div>
+
+    <!-- 4. Rol Asignado -->
+    <div class="form-group">
+        <label>Rol asignado</label>
+        <div class="input-wrapper">
+            <i class="fa-solid fa-user-gear"></i>
+            <select name="rol" id="id_rol" class="form-control" onchange="toggleAdminCodeField()" required>
+                <option value="" disabled selected>Selecciona un rol...</option>
+                {% for r in roles %}
+                    {% if 'direct' not in r.nombre_rol.lower %}
+                        <option value="{{ r.id_rol }}">
+                            {% if 'admin' in r.nombre_rol.lower or 'psicopedagogo' in r.nombre_rol.lower %}
+                                Psicopedagogo
+                            {% else %}
+                                {{ r.nombre_rol }}
+                            {% endif %}
+                        </option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+
+    <!-- 5. Código de Autorización Administrador (Dinámico) -->
+    <div class="form-group" id="admin-code-group" style="display: none; margin-top: 15px;">
+        <label style="color: #d97706; font-weight: 600;">Código de Autorización Administrador</label>
+        <div class="input-wrapper">
+            <i class="fa-solid fa-key" style="color: #d97706;"></i>
+            <input type="password" name="clave_admin" id="id_clave_admin" class="form-control" placeholder="Ingresa la clave maestra" style="border-color: #f59e0b;">
+        </div>
+        <small style="color: #b45309; font-size: 12px; margin-top: 4px; display: block;">
+            * Requerido únicamente para el rol de Psicopedagogo.
+        </small>
+    </div>
+
+    <!-- 6. Botón de Enviar -->
+    <button type="submit" class="btn-primary" style="margin-top: 20px;">
+        Registrar Usuario y Enviar Invitación
+    </button>
+</form>
+
+<script>
+    function toggleAdminCodeField() {
+        const rolSelect = document.getElementById('id_rol');
+        const selectedText = rolSelect.options[rolSelect.selectedIndex].text.toLowerCase();
+        const adminGroup = document.getElementById('admin-code-group');
+        const adminInput = document.getElementById('id_clave_admin');
+
+        if (selectedText.includes('psicopedagogo')) {
+            adminGroup.style.display = 'block';
+            adminInput.setAttribute('required', 'required');
+        } else {
+            adminGroup.style.display = 'none';
+            adminInput.removeAttribute('required');
+            adminInput.value = '';
+        }
+    }
+</script>
+{% endblock %}

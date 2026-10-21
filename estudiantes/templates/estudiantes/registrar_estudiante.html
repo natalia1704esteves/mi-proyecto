@@ -1,0 +1,299 @@
+{% extends 'usuarios/base_dashboard.html' %}
+
+{% block title %}Registrar Estudiante - SIGEP{% endblock %}
+
+{% block content %}
+<style>
+    .form-container {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        border: 1px solid var(--border-color);
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    .section-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--primary);
+        margin: 20px 0 15px 0;
+        padding-bottom: 6px;
+        border-bottom: 2px solid #f1f5f9;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .form-grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+    }
+    .form-grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .form-group label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-main);
+    }
+    .form-control-custom {
+        padding: 10px 14px;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+        background: #fafafa;
+        font-size: 14px;
+        outline: none;
+    }
+    .form-control-custom:focus {
+        border-color: var(--primary);
+        background: #ffffff;
+    }
+    .btn-submit {
+        background: var(--primary);
+        color: #ffffff;
+        border: none;
+        padding: 12px 28px;
+        font-weight: 600;
+        border-radius: 10px;
+        cursor: pointer;
+        margin-top: 25px;
+        float: right;
+    }
+    .btn-submit:hover {
+        background: var(--primary-dark);
+    }
+    /* Estilos para las alertas de Django */
+    .alert {
+        padding: 12px 16px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+    .alert-success {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        border: 1px solid #badbcc;
+    }
+    .alert-error, .alert-danger {
+        background-color: #f8d7da;
+        color: #842029;
+        border: 1px solid #f5c2c7;
+    }
+</style>
+
+<div class="form-container">
+    <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 10px;">Registro de Estudiante</h2>
+    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Ingresa la información personal, datos del representante y la asignación académica inicial.</p>
+
+    <!-- BLOQUE DE MENSAJES DE ÉXITO O ERROR -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <!-- DATOS DEL ESTUDIANTE -->
+        <div class="section-title">
+            <i class="fa-solid fa-graduation-cap"></i> Datos del Estudiante
+        </div>
+        <div class="form-grid-3">
+            <div class="form-group">
+                <label>Cédula / Identificación *</label>
+                <input type="text" name="est_cedula" class="form-control-custom" required>
+            </div>
+            <div class="form-group">
+                <label>Nombres *</label>
+                <input type="text" name="est_nombre" class="form-control-custom" required>
+            </div>
+            <div class="form-group">
+                <label>Apellidos *</label>
+                <input type="text" name="est_apellido" class="form-control-custom" required>
+            </div>
+            <div class="form-group">
+                <label>Fecha de Nacimiento</label>
+                <input type="date" name="est_fecha_nac" class="form-control-custom">
+            </div>
+            <div class="form-group">
+                <label>Sexo</label>
+                <select name="est_sexo" class="form-control-custom">
+                    <option value="">Seleccione...</option>
+                    <option value="M">Masculino</option>
+                    <option value="F">Femenino</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- DATOS DEL REPRESENTANTE -->
+        <div class="section-title">
+            <i class="fa-solid fa-user-group"></i> Datos del Representante
+        </div>
+        <div class="form-grid-3">
+            <div class="form-group">
+                <label>Cédula *</label>
+                <input type="text" name="rep_cedula" class="form-control-custom" required>
+            </div>
+            <div class="form-group">
+                <label>Nombres *</label>
+                <input type="text" name="rep_nombre" class="form-control-custom" required>
+            </div>
+            <div class="form-group">
+                <label>Apellidos *</label>
+                <input type="text" name="rep_apellido" class="form-control-custom" required>
+            </div>
+            <div class="form-group">
+                <label>Parentesco</label>
+                <input type="text" name="rep_parentesco" class="form-control-custom" placeholder="Ej: Madre / Padre">
+            </div>
+            <div class="form-group">
+                <label>Municipio</label>
+                <select name="rep_municipio" id="id_municipio" class="form-control-custom">
+                    <option value="">Seleccione Municipio...</option>
+                    {% for m in municipios %}
+                        <option value="{{ m.id_municipio }}">{{ m.nombre_municipio }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Parroquia</label>
+                <select name="rep_parroquia" id="id_parroquia" class="form-control-custom">
+                    <option value="">Seleccione Parroquia...</option>
+                    {% for p in parroquias %}
+                        <option value="{{ p.id_parroquia }}" data-municipio="{{ p.municipio.id_municipio }}">{{ p.nombre_parroquia }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Sector</label>
+                <input type="text" name="rep_sector" class="form-control-custom">
+            </div>
+            <div class="form-group">
+                <label>Calle</label>
+                <input type="text" name="rep_calle" class="form-control-custom">
+            </div>
+            <div class="form-group">
+                <label>Nro Casa / Apto</label>
+                <input type="text" name="rep_casa" class="form-control-custom">
+            </div>
+        </div>
+
+        <!-- ASIGNACIÓN ACADÉMICA -->
+        <div class="section-title">
+            <i class="fa-solid fa-school"></i> Asignación Académica
+        </div>
+        
+        <div class="form-grid-2" style="margin-bottom: 15px;">
+            <div class="form-group">
+                <label>Condición de Escolaridad *</label>
+                <select name="condicion_escolaridad" id="id_condicion_escolaridad" class="form-control-custom" required>
+                    <option value="escolarizado">Escolarizado</option>
+                    <option value="no_escolarizado">No Escolarizado</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="seccion_academica" class="form-grid-2">
+            <div class="form-group">
+                <label>Período Académico</label>
+                <select name="periodo" id="id_periodo" class="form-control-custom">
+                    <option value="">Seleccione Período...</option>
+                    {% for p in periodos %}
+                        <option value="{{ p.id_periodo }}">{{ p.nombre_periodo }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Escuela (Filtrada por Municipio del Representante)</label>
+                <select name="escuela" id="id_escuela" class="form-control-custom">
+                    <option value="">Seleccione Escuela...</option>
+                    {% for e in escuelas %}
+                        <option value="{{ e.id_escuela }}" data-municipio="{{ e.municipio.id_municipio }}">{{ e.nombre_escuela }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Grado</label>
+                <select name="grado" id="id_grado" class="form-control-custom">
+                    <option value="">Seleccione Grado...</option>
+                    {% for g in grados %}
+                        <option value="{{ g.id_grado }}">{{ g.num_grado }}° Grado</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Sección</label>
+                <select name="seccion" id="id_seccion" class="form-control-custom">
+                    <option value="">Seleccione Sección...</option>
+                    {% for s in secciones %}
+                        <option value="{{ s.id_seccion }}">Sección {{ s.letra_seccion }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-submit">Registrar Estudiante</button>
+        <div style="clear: both;"></div>
+    </form>
+</div>
+
+<script>
+    document.getElementById('id_municipio').addEventListener('change', function() {
+        const municipioId = this.value;
+        
+        // 1. Filtrar Parroquias
+        const parroquiaSelect = document.getElementById('id_parroquia');
+        parroquiaSelect.value = ""; 
+        parroquiaSelect.querySelectorAll('option').forEach(option => {
+            if (option.value === "") {
+                option.style.display = "block";
+                return;
+            }
+            if (option.getAttribute('data-municipio') === municipioId) {
+                option.style.display = "block";
+            } else {
+                option.style.display = "none";
+            }
+        });
+
+        // 2. Filtrar Escuelas según el municipio elegido
+        const escuelaSelect = document.getElementById('id_escuela');
+        escuelaSelect.value = "";
+        escuelaSelect.querySelectorAll('option').forEach(option => {
+            if (option.value === "") {
+                option.style.display = "block";
+                return;
+            }
+            if (option.getAttribute('data-municipio') === municipioId) {
+                option.style.display = "block";
+            } else {
+                option.style.display = "none";
+            }
+        });
+    });
+
+    // Controlar visibilidad y requerimientos de la sección académica si es No Escolarizado
+    document.getElementById('id_condicion_escolaridad').addEventListener('change', function() {
+        const seccionAcademica = document.getElementById('seccion_academica');
+        const inputsAcademicos = seccionAcademica.querySelectorAll('select');
+        
+        if (this.value === 'no_escolarizado') {
+            seccionAcademica.style.display = 'none';
+            inputsAcademicos.forEach(input => input.value = '');
+        } else {
+            seccionAcademica.style.display = 'grid';
+        }
+    });
+</script>
+{% endblock %}

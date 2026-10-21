@@ -1,0 +1,30 @@
+{% extends 'usuarios/base.html' %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 500px;">
+    <div class="card shadow-sm p-4">
+        <h3 class="text-center mb-3">Verificar Nuevo Correo</h3>
+        <p class="text-muted text-center">
+            Hemos enviado un código de 6 dígitos a <strong>{{ nuevo_email }}</strong>.
+        </p>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} text-center" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group mb-3">
+                <label for="codigo" class="form-label">Código de Verificación</label>
+                <input type="text" name="codigo" id="codigo" class="form-control text-center fs-4" maxlength="6" placeholder="123456" required autofocus>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mb-2">Confirmar Cambio</button>
+            <a href="{% url 'configuracion' %}" class="btn btn-link w-100 text-center text-decoration-none">Cancelar</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

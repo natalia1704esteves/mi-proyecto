@@ -1,0 +1,238 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SIGEP{% endblock %}</title>
+    
+    <!-- Fuente Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Iconos FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path fill='%230096a6' d='M50,88.5 C48,87 12,62 12,35 C12,19.5 24.5,7 40,7 C45.5,7 50,9.5 50,9.5 C50,9.5 54.5,7 60,7 C75.5,7 88,19.5 88,35 C88,62 52,87 50,88.5 Z'/><path fill='none' stroke='%23ffffff' stroke-width='6' stroke-linecap='round' stroke-linejoin='round' d='M 22 45 L 36 45 L 42 32 L 48 58 L 54 38 L 60 48 L 66 45 L 78 45'/></svg>">
+
+    <style>
+        :root {
+            --primary: #00A8CC;
+            --primary-hover: #008CAE;
+            --bg-color: #EBF4F8;
+            --card-bg: #FFFFFF;
+            --text-main: #2C3E50;
+            --text-muted: #7F8C8D;
+            --input-bg: #F7FAFC;
+            --border-color: #E2E8F0;
+            --danger: #E74C3C;
+            --success: #2ECC71;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 420px;
+            padding: 35px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 168, 204, 0.08);
+            text-align: center;
+        }
+
+        .brand-logo {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .brand-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-main);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper > i.icon-left {
+            position: absolute;
+            left: 14px;
+            color: var(--primary);
+            font-size: 15px;
+            pointer-events: none;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 40px 12px 42px; /* Padding derecho suficiente para el visor */
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 14px;
+            color: var(--text-main);
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: #FFF;
+            box-shadow: 0 0 0 3px rgba(0, 168, 204, 0.15);
+        }
+
+        /* Botón de ver contraseña (ojo) */
+        .toggle-password-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 15px;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            transition: color 0.2s ease;
+        }
+
+        .toggle-password-btn:hover {
+            color: var(--primary);
+        }
+
+        select.form-control {
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 13px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(0, 168, 204, 0.3);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .auth-links {
+            margin-top: 20px;
+            font-size: 13px;
+        }
+
+        .auth-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-links a:hover {
+            text-decoration: underline;
+        }
+
+        .alert-msg {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .alert-error { background-color: #FDEDEC; color: var(--danger); border: 1px solid #FADBD8; }
+        .alert-success { background-color: #E8F8F5; color: var(--success); border: 1px solid #A3E4D7; }
+
+        .info-text {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="brand-logo">
+            <i class="fa-solid fa-heart-pulse"></i> SIGEP
+        </div>
+        <p class="brand-subtitle">Sistema de Gestión Escolar y Psicopedagógica</p>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert-msg {% if message.tags == 'success' %}alert-success{% else %}alert-error{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <script>
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash");
+            } else {
+                input.type = "password";
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye");
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
+

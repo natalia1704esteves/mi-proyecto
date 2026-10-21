@@ -1,0 +1,921 @@
+{% extends 'usuarios/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    body:has(.informe-paper-page) {
+        display: block !important;
+        min-height: 100vh;
+        height: auto;
+        padding: 0 !important;
+        margin: 0;
+        background: #525659;
+    }
+
+    body:has(.informe-paper-page) > .auth-container {
+        width: 100% !important;
+        max-width: none !important;
+        min-height: 100vh;
+        height: auto;
+        padding: 0 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: transparent !important;
+    }
+
+    .informe-paper-page {
+        width: 100%;
+        max-width: 900px;
+        margin: 0 auto 40px;
+        padding: 0 15px;
+    }
+
+    .paper-sheet {
+        background: #fff;
+        padding: 40px 50px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, .3);
+        font-family: "Times New Roman", Times, serif;
+        color: #000;
+    }
+
+    .header-table,
+    .data-table,
+    .signatures-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 12px;
+    }
+
+    .data-table th,
+    .data-table td {
+        border: 1px solid #000;
+        padding: 6px 8px;
+        font-size: 10pt;
+        text-align: center;
+    }
+
+    .section-header {
+        background-color: #f2f2f2;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 10pt;
+        border: 1px solid #000;
+        padding: 6px 8px;
+        margin-top: 14px;
+        text-align: center;
+    }
+
+    .textarea-box {
+        display: block;
+        width: 100%;
+        border: 1px solid #000;
+        border-top: none;
+        padding: 8px;
+        font-family: "Times New Roman", Times, serif;
+        font-size: 10pt;
+        outline: none;
+        resize: vertical;
+        box-sizing: border-box;
+        background: #fff;
+        color: #000;
+    }
+
+    .signatures-table {
+        margin-top: 50px;
+        margin-bottom: 20px;
+    }
+
+    .signatures-table td {
+        text-align: center;
+        vertical-align: bottom;
+        padding: 0 15px;
+        font-size: 9pt;
+        font-weight: bold;
+    }
+
+    .signature-line {
+        border-top: 1px solid #000;
+        margin-bottom: 5px;
+        min-height: 1px;
+    }
+
+    .header-bar-no-print {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 20px auto 15px;
+        max-width: 870px;
+        background: #f8f9fa;
+        padding: 10px 20px;
+        border-radius: 6px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, .1);
+    }
+
+    .btn-regresar-top {
+        background-color: #6c757d;
+        color: #fff;
+        padding: 8px 15px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-weight: bold;
+        font-family: sans-serif;
+        font-size: 14px;
+    }
+
+    .btn-regresar-top:hover {
+        background-color: #5a6268;
+        color: #fff;
+    }
+
+    .btn-guardar-informe {
+        background-color: #198754;
+        color: #fff;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        font-family: sans-serif;
+        font-size: 14px;
+    }
+
+    .btn-guardar-informe:hover {
+        background-color: #146c43;
+    }
+
+    .btn-descargar-informe {
+        background-color: #2b6cb0;
+        color: #fff;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 4px;
+        font-weight: bold;
+        cursor: pointer;
+        font-family: sans-serif;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .btn-descargar-informe:hover {
+        background-color: #2b5480;
+        color: #fff;
+    }
+
+    /* La patología se oculta en pantalla y se muestra al imprimir. */
+    .patologia-impresion {
+        display: none;
+    }
+
+    @page {
+        size: letter portrait;
+        margin: 10mm 15mm;
+    }
+
+    @media print {
+        body:has(.informe-paper-page) * {
+            visibility: hidden !important;
+        }
+
+        body:has(.informe-paper-page) .informe-paper-page,
+        body:has(.informe-paper-page) .informe-paper-page * {
+            visibility: visible !important;
+        }
+
+        body:has(.informe-paper-page) {
+            background: #fff !important;
+            min-height: 0 !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        body:has(.informe-paper-page) > .auth-container {
+            width: 100% !important;
+            min-height: 0 !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #fff !important;
+        }
+
+        body:has(.informe-paper-page) .informe-paper-page {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .no-print {
+            display: none !important;
+        }
+
+        .paper-sheet {
+            box-shadow: none !important;
+            padding: 0 !important;
+            background: #fff !important;
+        }
+
+        .section-header {
+            background-color: #f2f2f2 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .patologia-impresion {
+            display: block !important;
+            visibility: visible !important;
+            padding: 2px 0;
+            min-height: 18px;
+            font-family: "Times New Roman", Times, serif;
+            font-size: 10pt;
+            color: #000 !important;
+            white-space: pre-wrap;
+        }
+
+        textarea {
+            overflow: visible !important;
+            resize: none !important;
+            background: #fff !important;
+            color: #000 !important;
+            -webkit-text-fill-color: #000 !important;
+        }
+
+        input {
+            color: #000 !important;
+            -webkit-text-fill-color: #000 !important;
+        }
+
+        .data-table,
+        .header-table,
+        .signatures-table {
+            page-break-inside: avoid;
+        }
+    }
+</style>
+
+<!-- BARRA SUPERIOR DE NAVEGACIÓN: NO SE IMPRIME -->
+<div class="header-bar-no-print no-print">
+    <a href="{% url 'estudiantes:listar_bitacoras' %}"
+       class="btn-regresar-top">
+        <i class="fa-solid fa-arrow-left me-1"></i> Volver
+    </a>
+
+    <h3 style="margin: 0; font-family: sans-serif; color: #333; font-size: 1.25rem;">
+        {% if solo_lectura %}
+            Visualizando Informe Oficial
+        {% elif editando %}
+            Editando Registro Oficial
+        {% else %}
+            Redactando Registro Oficial
+        {% endif %}
+    </h3>
+</div>
+
+<div class="informe-paper-page">
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="paper-sheet">
+
+            <!-- MEMBRETE OFICIAL DEL PLANTEL -->
+            <table class="header-table">
+                <tr>
+                    <td style="width: 15%; text-align: center;">
+                        <i class="fa-solid fa-graduation-cap fs-1"></i>
+                    </td>
+
+                    <td style="text-align: center;">
+                        <strong style="font-size: 11pt;">
+                            UNIDAD EDUCATIVA "RAFAEL ARÉVALO GONZÁLEZ"
+                        </strong>
+                        <br>
+                        <span style="font-size: 10pt;">
+                            Unidad Psicoeducativa "R.A.G." - Educación Especial
+                        </span>
+                        <br>
+                        <span style="font-size: 9pt;">
+                            Municipio Páez - Estado Miranda
+                        </span>
+                    </td>
+
+                    <td style="width: 15%; text-align: center;">
+                        <i class="fa-solid fa-school fs-1"></i>
+                    </td>
+                </tr>
+            </table>
+
+            <div style="text-align: center;
+                        font-weight: bold;
+                        font-size: 12pt;
+                        margin: 15px 0 20px;
+                        letter-spacing: .5px;
+                        text-transform: uppercase;">
+                INFORME PSICOPEDAGÓGICO ESPECIAL
+            </div>
+
+            <!-- FECHA -->
+            <div style="margin-bottom: 15px; font-size: 10pt;">
+                <strong>Fecha:</strong>
+                <input
+                    type="date"
+                    name="fecha_informe"
+                    value="{% if bitacora.fecha_informe %}{{ bitacora.fecha_informe|date:'Y-m-d' }}{% else %}{{ bitacora.fecha_creacion|date:'Y-m-d' }}{% endif %}"
+                    style="width: 200px;
+                           border: 1px solid #000;
+                           padding: 3px 6px;
+                           font-size: 10pt;"
+                    {% if solo_lectura %}readonly{% endif %}
+                    required
+                >
+            </div>
+
+            <!-- DATOS DE IDENTIFICACIÓN -->
+            <div class="section-header">
+                DATOS DE IDENTIFICACIÓN
+            </div>
+
+            <table class="data-table">
+                <tr>
+                    <td colspan="2">
+                        <strong>APELLIDOS Y NOMBRES DEL ESTUDIANTE:</strong>
+                        <br>
+                        {{ estudiante.persona.nombre }}
+                        {{ estudiante.persona.apellido }}
+                    </td>
+
+                    <td style="width: 30%;">
+                        <strong>CÉDULA / CÓDIGO:</strong>
+                        <br>
+                        {{ estudiante.persona.cedula_persona|default:"Sin C.I." }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td style="width: 45%;">
+                        <strong>FECHA DE NACIMIENTO:</strong>
+                        <br>
+                        {{ estudiante.persona.fecha_nacimiento|date:"d/m/Y"|default:"N/D" }}
+                    </td>
+
+                    <td style="width: 25%;">
+                        <strong>EDAD:</strong>
+                        <br>
+                        <input
+                            type="text"
+                            name="edad"
+                            value="{{ bitacora.edad|default:'' }}"
+                            placeholder="Ej: 8 años"
+                            style="width: 100%;
+                                   border: none;
+                                   outline: none;
+                                   font-size: 10pt;
+                                   text-align: center;"
+                            {% if solo_lectura %}readonly{% endif %}
+                        >
+                    </td>
+
+                    <td>
+                        <strong>SEXO:</strong>
+                        <br>
+                        {{ estudiante.persona.sexo|default:"N/D" }}
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2">
+                        <strong>PADRE / REPRESENTANTE:</strong>
+                        <br>
+                        {{ estudiante.representante.persona.nombre|default:"" }}
+                        {{ estudiante.representante.persona.apellido|default:"N/D" }}
+                    </td>
+
+                    <td>
+                        <strong>PARENTESCO:</strong>
+                        <br>
+                        {{ estudiante.representante.parentesco|default:"N/D" }}
+                    </td>
+                </tr>
+            </table>
+
+            <!-- DIAGNÓSTICO / PATOLOGÍA EVALUADA CON FILTRO EN CASCADA -->
+            <div class="section-header">
+                DIAGNÓSTICO / PATOLOGÍA EVALUADA
+            </div>
+
+            <div style="border: 1px solid #000;
+                        border-top: none;
+                        padding: 10px;
+                        background-color: #fafafa;">
+
+                <!-- Selectores en pantalla (Filtrados por Área Patológica) -->
+                <div class="row g-2 align-items-center no-print">
+                    <div class="col-md-5">
+                        <label class="form-label fw-bold text-dark small mb-1">Área Patológica:</label>
+                        <select id="filtro_area_patologica" class="form-select form-select-sm" style="border: 1px solid #000; font-size: 9.5pt;" {% if solo_lectura %}disabled{% endif %}>
+                            <option value="">-- Todas las Áreas --</option>
+                            {% for area in areas_patologicas %}
+                                <option value="{{ area.id_area_patologica }}" {% if bitacora.patologia and bitacora.patologia.area_patologica_id == area.id_area_patologica %}selected{% endif %}>
+                                    {{ area.nombre_area }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="col-md-{% if solo_lectura %}7{% else %}5{% endif %}">
+                        <label class="form-label fw-bold text-dark small mb-1">Patología / Diagnóstico:</label>
+                        <select
+                            name="patologia"
+                            id="select_patologia"
+                            class="form-select form-select-sm"
+                            style="border: 1px solid #000; font-size: 9.5pt;"
+                            {% if solo_lectura %}disabled{% endif %}
+                        >
+                            <option value="">-- Seleccionar Patología --</option>
+
+                            {% for pat in patologias %}
+                                <option
+                                    value="{{ pat.id_patologia }}"
+                                    data-area="{{ pat.area_patologica_id }}"
+                                    {% if bitacora.patologia_id == pat.id_patologia %}selected{% endif %}
+                                >
+                                    {{ pat.nombre_patologia }} {% if pat.area_patologica %}({{ pat.area_patologica.nombre_area }}){% endif %}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    {% if not solo_lectura %}
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-dark fw-bold w-100 text-nowrap mt-3"
+                            data-bs-toggle="modal"
+                            data-bs-target="#modalNuevaPatologia"
+                            style="border: 1px solid #000; font-size: 8.5pt; padding: 5px 6px;"
+                        >
+                            <i class="fa-solid fa-plus me-1"></i> + Nueva
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Nombre que aparece en el informe impreso -->
+                <div id="patologia_impresion" class="patologia-impresion">
+                    {% if bitacora.patologia %}
+                        {{ bitacora.patologia.nombre_patologia }} {% if bitacora.patologia.area_patologica %}({{ bitacora.patologia.area_patologica.nombre_area }}){% endif %}
+                    {% else %}
+                        No especificada
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- CARACTERIZACIÓN / MOTIVO DE CONSULTA -->
+            <div class="section-header">
+                CARACTERIZACIÓN PEDAGÓGICA-SOCIAL / MOTIVO DE CONSULTA
+            </div>
+
+            <textarea
+                name="motivo_consulta"
+                rows="3"
+                class="textarea-box"
+                placeholder="Redacte el motivo de consulta o evaluación..."
+                {% if solo_lectura %}readonly{% endif %}
+            >{{ bitacora.motivo_consulta|default:'' }}</textarea>
+
+            <!-- OBSERVACIONES Y DESARROLLO -->
+            <div class="section-header">
+                OBSERVACIONES Y DESARROLLO DEL INFORME
+            </div>
+
+            <textarea
+                name="observaciones_generales"
+                rows="5"
+                class="textarea-box"
+                placeholder="Escriba el desarrollo de las observaciones..."
+                {% if solo_lectura %}readonly{% endif %}
+            >{{ bitacora.observaciones_generales|default:'' }}</textarea>
+
+            <!-- RECOMENDACIONES -->
+            <div class="section-header">
+                RECOMENDACIONES
+            </div>
+
+            <textarea
+                name="recomendaciones"
+                rows="3"
+                class="textarea-box"
+                placeholder="Recomendaciones para el área educativa y el hogar..."
+                {% if solo_lectura %}readonly{% endif %}
+            >{{ bitacora.recomendaciones|default:'' }}</textarea>
+
+            <!-- SECCIÓN DE FIRMAS OFICIALES -->
+            <table class="signatures-table">
+                <tr>
+                    <td style="width: 33%;">
+                        <div class="signature-line"></div>
+                        DOCENTE ESPECIALISTA
+                    </td>
+
+                    <td style="width: 34%;">
+                        <div class="signature-line"></div>
+                        SUBDIRECTORA U.P.E.
+                    </td>
+
+                    <td style="width: 33%;">
+                        <div class="signature-line"></div>
+                        DIRECTOR DEL PLANTEL
+                    </td>
+                </tr>
+            </table>
+
+            <!-- BOTONES DE ACCIÓN: NO SE IMPRIMEN -->
+            <div class="d-flex justify-content-end align-items-center mt-3 no-print">
+                <div class="d-flex gap-2">
+
+                    {% if not solo_lectura %}
+
+                        <a
+                            href="javascript:history.back()"
+                            class="btn btn-secondary btn-sm px-3"
+                            style="border-radius: 4px;
+                                   font-weight: bold;
+                                   font-family: sans-serif;"
+                        >
+                            Cancelar
+                        </a>
+
+                        <button
+                            type="submit"
+                            class="btn-guardar-informe"
+                        >
+                            <i class="fa-solid fa-floppy-disk me-1"></i>
+
+                            {% if editando %}
+                                Guardar Cambios
+                            {% else %}
+                                Guardar Informe Oficial
+                            {% endif %}
+                        </button>
+
+                    {% else %}
+
+                        <button
+                            type="button"
+                            class="btn-descargar-informe"
+                            onclick="window.print();"
+                        >
+                            <i class="fa-solid fa-print me-1"></i>
+                            Imprimir Informe
+                        </button>
+
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<!-- MODAL PARA REGISTRAR UNA NUEVA PATOLOGÍA -->
+{% if not solo_lectura %}
+<div
+    class="modal fade no-print"
+    id="modalNuevaPatologia"
+    tabindex="-1"
+    aria-labelledby="modalNuevaPatologiaLabel"
+    aria-hidden="true"
+>
+    <div class="modal-dialog modal-dialog-centered">
+        <div
+            class="modal-content"
+            style="border: 1px solid #000; border-radius: 8px;"
+        >
+            <div class="modal-header bg-light">
+                <h6
+                    class="modal-title fw-bold text-dark"
+                    id="modalNuevaPatologiaLabel"
+                >
+                    <i class="fa-solid fa-notes-medical me-2"></i>
+                    Registrar Nueva Patología
+                </h6>
+
+                <button
+                    type="button"
+                    class="btn-close"
+                    data-bs-dismiss="modal"
+                    aria-label="Cerrar"
+                ></button>
+            </div>
+
+            <div class="modal-body p-3">
+                <div class="mb-3">
+                    <label
+                        for="nombre_patologia_input"
+                        class="form-label fw-semibold text-dark small"
+                    >
+                        Nombre de la Patología / Diagnóstico:
+                    </label>
+
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="nombre_patologia_input"
+                        placeholder="Ej. TDAH, Dislexia"
+                        required
+                    >
+                </div>
+
+                <div class="mb-2">
+                    <label
+                        for="area_patologica_select"
+                        class="form-label fw-semibold text-dark small"
+                    >
+                        Área Patológica (Obligatorio):
+                    </label>
+
+                    <select
+                        class="form-select"
+                        id="area_patologica_select"
+                        required
+                    >
+                        <option value="">
+                            -- Seleccionar Área Patológica --
+                        </option>
+
+                        {% for area in areas_patologicas %}
+                            <option value="{{ area.id_area_patologica }}">
+                                {{ area.nombre_area }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div
+                    id="msgErrorPatologia"
+                    class="alert alert-danger d-none py-1 small mb-0 mt-2"
+                ></div>
+            </div>
+
+            <div class="modal-footer bg-light py-2">
+                <button
+                    type="button"
+                    class="btn btn-secondary btn-sm"
+                    data-bs-dismiss="modal"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="button"
+                    class="btn btn-dark btn-sm px-3 fw-bold"
+                    id="btnGuardarPatologiaAjax"
+                >
+                    Guardar Patología
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- JAVASCRIPT Y BOOTSTRAP -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const btnGuardar = document.getElementById('btnGuardarPatologiaAjax');
+    const inputNombre = document.getElementById('nombre_patologia_input');
+    const selectArea = document.getElementById('area_patologica_select');
+    const selectPatologiaMain = document.getElementById('select_patologia');
+    const filtroArea = document.getElementById('filtro_area_patologica');
+    const patologiaImpresion = document.getElementById('patologia_impresion');
+    const msgError = document.getElementById('msgErrorPatologia');
+    const modalElement = document.getElementById('modalNuevaPatologia');
+
+    // Guardar todas las opciones originales de patologías para el filtrado en cascada
+    let todasLasPatologias = [];
+    if (selectPatologiaMain) {
+        Array.from(selectPatologiaMain.options).forEach(opt => {
+            if (opt.value) {
+                todasLasPatologias.push({
+                    value: opt.value,
+                    text: opt.text,
+                    area: opt.getAttribute('data-area'),
+                    selected: opt.selected
+                });
+            }
+        });
+    }
+
+    // Filtrar patologías según el área seleccionada
+    function filtrarPatologiasPorArea() {
+        if (!filtroArea || !selectPatologiaMain) return;
+        const areaSeleccionada = filtroArea.value;
+        const valorActual = selectPatologiaMain.value;
+
+        selectPatologiaMain.innerHTML = '<option value="">-- Seleccionar Patología --</option>';
+
+        todasLasPatologias.forEach(item => {
+            if (!areaSeleccionada || item.area === areaSeleccionada) {
+                const opt = new Option(item.text, item.value);
+                if (item.value === valorActual) {
+                    opt.selected = true;
+                }
+                selectPatologiaMain.add(opt);
+            }
+        });
+        actualizarPatologiaImpresion();
+    }
+
+    if (filtroArea) {
+        filtroArea.addEventListener('change', filtrarPatologiasPorArea);
+        // Si ya hay una patología seleccionada al cargar, filtrar automáticamente por su área
+        const opcionSeleccionada = selectPatologiaMain.querySelector('option[selected], option:checked');
+        if (opcionSeleccionada && opcionSeleccionada.value) {
+            const areaId = opcionSeleccionada.getAttribute('data-area');
+            if (areaId) {
+                filtroArea.value = areaId;
+                filtrarPatologiasPorArea();
+                selectPatologiaMain.value = opcionSeleccionada.value;
+            }
+        }
+    }
+
+    /*
+     * Actualiza el nombre que se verá al imprimir
+     * según la opción seleccionada.
+     */
+    function actualizarPatologiaImpresion() {
+        if (!selectPatologiaMain || !patologiaImpresion) {
+            return;
+        }
+
+        const opcion =
+            selectPatologiaMain.options[selectPatologiaMain.selectedIndex];
+
+        patologiaImpresion.textContent =
+            opcion && opcion.value
+                ? opcion.textContent.trim()
+                : 'No especificada';
+    }
+
+    if (selectPatologiaMain) {
+        actualizarPatologiaImpresion();
+
+        selectPatologiaMain.addEventListener(
+            'change',
+            actualizarPatologiaImpresion
+        );
+    }
+
+    /*
+     * Registro AJAX de una nueva patología.
+     */
+    if (
+        btnGuardar &&
+        modalElement &&
+        inputNombre &&
+        selectArea &&
+        msgError &&
+        selectPatologiaMain
+    ) {
+        btnGuardar.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const nombre = inputNombre.value.trim();
+            const areaId = selectArea.value;
+
+            if (!nombre) {
+                msgError.textContent =
+                    'Por favor ingrese el nombre de la patología.';
+
+                msgError.classList.remove('d-none');
+                return;
+            }
+
+            if (!areaId) {
+                msgError.textContent =
+                    'Debe seleccionar un Área Patológica obligatoriamente.';
+
+                msgError.classList.remove('d-none');
+                return;
+            }
+
+            msgError.classList.add('d-none');
+
+            const formData = new FormData();
+
+            formData.append('nombre_patologia', nombre);
+            formData.append('area_patologica', areaId);
+
+            const csrfInput =
+                document.querySelector('[name=csrfmiddlewaretoken]');
+
+            const csrfToken = csrfInput ? csrfInput.value : '';
+
+            formData.append('csrfmiddlewaretoken', csrfToken);
+
+            fetch("{% url 'estudiantes:crear_patologia_ajax' %}", {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error(
+                        'Respuesta del servidor: ' + response.status
+                    );
+                }
+
+                return response.json();
+            })
+            .then(function (data) {
+
+                if (data.success) {
+
+                    const nuevaOpcion = new Option(
+                        data.nombre + ' (' + data.area_nombre + ')',
+                        data.id,
+                        true,
+                        true
+                    );
+                    nuevaOpcion.setAttribute('data-area', areaId);
+
+                    todasLasPatologias.push({
+                        value: data.id,
+                        text: data.nombre + ' (' + data.area_nombre + ')',
+                        area: String(areaId)
+                    });
+
+                    if (filtroArea) {
+                        filtroArea.value = areaId;
+                        filtrarPatologiasPorArea();
+                    }
+                    selectPatologiaMain.value = data.id;
+
+                    /* Actualizar también la versión para impresión. */
+                    actualizarPatologiaImpresion();
+
+                    inputNombre.value = '';
+                    selectArea.value = '';
+
+                    let modalInstance =
+                        bootstrap.Modal.getInstance(modalElement);
+
+                    if (!modalInstance) {
+                        modalInstance =
+                            new bootstrap.Modal(modalElement);
+                    }
+
+                    modalInstance.hide();
+
+                    document
+                        .querySelectorAll('.modal-backdrop')
+                        .forEach(function (elemento) {
+                            elemento.remove();
+                        });
+
+                    document.body.classList.remove('modal-open');
+
+                    document.body.style.removeProperty('padding-right');
+                    document.body.style.removeProperty('overflow');
+
+                } else {
+
+                    msgError.textContent =
+                        data.error || 'Ocurrió un error al guardar.';
+
+                    msgError.classList.remove('d-none');
+                }
+            })
+            .catch(function (error) {
+
+                console.error(
+                    'Error al guardar la patología:',
+                    error
+                );
+
+                msgError.textContent =
+                    'Error al conectar con el servidor. Verifique e intente nuevamente.';
+
+                msgError.classList.remove('d-none');
+            });
+        });
+    }
+});
+</script>
+
+{% endblock %}

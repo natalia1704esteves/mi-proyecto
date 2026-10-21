@@ -1,0 +1,201 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Redactar Informe - SIGEP</title>
+    <!-- FontAwesome para Iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Bootstrap CSS para Modales y Estilos de Formulario -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; padding: 20px; color: #212529; }
+        .container { max-width: 900px; margin: 30px auto; background: #ffffff; padding: 35px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #dee2e6; padding-bottom: 15px; margin-bottom: 25px; }
+        h2 { color: #0d6efd; margin: 0; display: flex; align-items: center; gap: 10px; font-size: 1.5rem; }
+        .student-info-box { background-color: #f1f8ff; border-left: 4px solid #0d6efd; padding: 15px; border-radius: 6px; margin-bottom: 25px; }
+        .student-info-box p { margin: 4px 0; font-size: 0.95rem; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: #495057; }
+        .form-control, .form-select { width: 100%; padding: 12px; border: 1px solid #dee2e6; border-radius: 6px; font-size: 1rem; font-family: inherit; }
+        textarea.form-control { resize: vertical; min-height: 120px; }
+        .btn-container { display: flex; justify-content: flex-end; gap: 12px; margin-top: 30px; border-top: 1px solid #dee2e6; padding-top: 20px; }
+        .btn-guardar { background-color: #198754; color: white; border: none; padding: 12px 25px; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem; display: inline-flex; align-items: center; gap: 8px; }
+        .btn-guardar:hover { background-color: #157347; }
+        .badge-tipo { background-color: #0dcaf0; color: #000; padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-flex">
+            <h2>
+                <i class="fa-solid fa-file-pen"></i> Redactar Bitácora / Informe 
+                <span class="badge-tipo">{{ tipo_informe }}</span>
+            </h2>
+            <a href="javascript:history.back()" class="btn-regresar" style="background-color: #6c757d; color: white; padding: 8px 14px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.95rem;">
+                <i class="fa-solid fa-arrow-left"></i> Volver
+            </a>
+        </div>
+
+        <div class="student-info-box">
+            <p><strong>Estudiante:</strong> {{ estudiante.persona.nombre }} {{ estudiante.persona.apellido }}</p>
+            <p><strong>Cédula / Identificación:</strong> {{ estudiante.persona.cedula_persona|default:"Sin C.I." }}</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="motivo"><i class="fa-solid fa-bullseye"></i> Motivo de la Evaluación / Consulta</label>
+                <input type="text" id="motivo" name="motivo" class="form-control" placeholder="Ej. Evaluación psicoeducativa integral de seguimiento..." required>
+            </div>
+
+            <!-- CAMPO: SELECCIÓN DE PATOLOGÍA / DIAGNÓSTICO -->
+            <div class="form-group">
+                <label for="select_patologia"><i class="fa-solid fa-stethoscope"></i> Diagnóstico / Patología Evaluada</label>
+                <div class="input-group">
+                    <select name="patologia" id="select_patologia" class="form-select">
+                        <option value="">-- Seleccionar Patología --</option>
+                        {% for pat in patologias %}
+                            <option value="{{ pat.id_patologia }}">{{ pat.nombre_patologia }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="button" class="btn btn-outline-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#modalNuevaPatologia">
+                        <i class="fa-solid fa-plus me-1"></i> Nueva Patología
+                    </button>
+                </div>
+                <small class="text-muted d-block mt-1">¿No encuentra la patología? Presione <b>"+ Nueva Patología"</b> para añadirla al instante.</small>
+            </div>
+
+            <div class="form-group">
+                <label for="observaciones"><i class="fa-solid fa-comments"></i> Observaciones Clínicas / Conductuales</label>
+                <textarea id="observaciones" name="observaciones" class="form-control" placeholder="Describa el comportamiento, actitud y desenvolvimiento observado..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="recomendaciones"><i class="fa-solid fa-list-check"></i> Orientaciones y Recomendaciones</label>
+                <textarea id="recomendaciones" name="recomendaciones" class="form-control" placeholder="Especifique las pautas para el hogar y la institución educativa..." required></textarea>
+            </div>
+
+            <div class="btn-container">
+                <button type="submit" class="btn-guardar">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar Informe
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- MODAL BOOTSTRAP PARA AÑADIR NUEVA PATOLOGÍA CON AJAX -->
+    <div class="modal fade" id="modalNuevaPatologia" tabindex="-1" aria-labelledby="modalNuevaPatologiaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title fw-bold text-dark" id="modalNuevaPatologiaLabel">
+                        <i class="fa-solid fa-notes-medical text-primary me-2"></i>Registrar Nueva Patología
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="formNuevaPatologiaAjax">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="nombre_patologia_input" class="form-label fw-semibold text-secondary">Nombre de la Patología / Diagnóstico:</label>
+                            <input type="text" class="form-control" id="nombre_patologia_input" name="nombre_patologia" placeholder="Ej. Trastorno del Procesamiento Sensorial" required>
+                        </div>
+
+                        {% if areas_patologicas %}
+                        <div class="mb-3">
+                            <label for="area_patologica_select" class="form-label fw-semibold text-secondary">Área Patológica (Opcional):</label>
+                            <select class="form-select" id="area_patologica_select" name="area_patologica">
+                                <option value="">-- Seleccionar Área --</option>
+                                {% for area in areas_patologicas %}
+                                    <option value="{{ area.id_area_patologica }}">{{ area.nombre_area }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        {% endif %}
+
+                        <div id="msgErrorPatologia" class="alert alert-danger d-none py-2 small mb-0 mt-2"></div>
+                    </form>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary btn-sm px-3 fw-semibold" id="btnGuardarPatologiaAjax">
+                        <i class="fa-solid fa-floppy-disk me-1"></i> Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS de Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- SCRIPT AJAX PARA PROCESAR LA PATOLOGÍA EN SEGUNDO PLANO -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnGuardar = document.getElementById('btnGuardarPatologiaAjax');
+        const inputNombre = document.getElementById('nombre_patologia_input');
+        const selectArea = document.getElementById('area_patologica_select');
+        const selectPatologiaMain = document.getElementById('select_patologia');
+        const msgError = document.getElementById('msgErrorPatologia');
+        const modalElement = document.getElementById('modalNuevaPatologia');
+        
+        if (btnGuardar && modalElement) {
+            const bsModal = new bootstrap.Modal(modalElement);
+
+            btnGuardar.addEventListener('click', function() {
+                const nombre = inputNombre.value.trim();
+                if (!nombre) {
+                    msgError.textContent = 'Por favor ingrese el nombre de la patología.';
+                    msgError.classList.remove('d-none');
+                    return;
+                }
+
+                msgError.classList.add('d-none');
+
+                const formData = new FormData();
+                formData.append('nombre_patologia', nombre);
+                if (selectArea && selectArea.value) {
+                    formData.append('area_patologica', selectArea.value);
+                }
+                
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]') ? document.querySelector('[name=csrfmiddlewaretoken]').value : '';
+                formData.append('csrfmiddlewaretoken', csrfToken);
+
+                fetch("{% url 'estudiantes:crear_patologia_ajax' %}", {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Agregar y seleccionar automáticamente la patología creada
+                        const nuevaOpcion = new Option(data.nombre, data.id, true, true);
+                        selectPatologiaMain.add(nuevaOpcion);
+
+                        // Limpiar modal y cerrarlo
+                        inputNombre.value = '';
+                        if (selectArea) selectArea.value = '';
+
+                        bsModal.hide();
+                    } else {
+                        msgError.textContent = data.error || 'Ocurrió un error al registrar la patología.';
+                        msgError.classList.remove('d-none');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    msgError.textContent = 'Error al conectar con el servidor.';
+                    msgError.classList.remove('d-none');
+                });
+            });
+        }
+    });
+    </script>
+</body>
+</html>

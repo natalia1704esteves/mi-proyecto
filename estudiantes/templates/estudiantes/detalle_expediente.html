@@ -1,0 +1,708 @@
+{% extends 'usuarios/base_dashboard.html' %}
+{% load static %}
+
+{% block title %}Carpeta de {{ estudiante.persona.nombre }} - SIGEP{% endblock %}
+
+{% block content %}
+
+<style>
+    /* MODALES */
+    .sigep-modal-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(15, 23, 42, 0.65);
+        backdrop-filter: blur(5px);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .sigep-modal-content {
+        background: #ffffff;
+        border-radius: 20px;
+        width: 92%;
+        max-width: 720px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 36px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        animation: modalFadeIn 0.2s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* CONTENEDOR PRINCIPAL */
+    .expediente-card {
+        background: #ffffff;
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+    }
+
+    /* ENCABEZADO Y ESPACIADO */
+    .expediente-encabezado {
+        gap: 18px;
+        margin-bottom: 22px !important;
+        padding-bottom: 18px !important;
+    }
+
+    .expediente-identificacion {
+        gap: 14px !important;
+        flex-wrap: wrap;
+    }
+
+    .expediente-datos {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .expediente-datos h3 {
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    .expediente-datos small {
+        display: block;
+        margin-top: 3px;
+    }
+
+    /* BOTONES ESTILO SIGEP PRINCIPAL */
+    .btn-sigep {
+        background: #0096a6;
+        color: #ffffff !important;
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 10px 24px;
+        border: none;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+    }
+
+    .btn-sigep:hover {
+        background: #007788;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(0, 150, 166, 0.3);
+    }
+
+    .btn-cancelar-sigep {
+        background-color: #f8fafc;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 10px 22px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    .btn-cancelar-sigep:hover {
+        background-color: #e6f4f6;
+        color: #0096a6;
+        border-color: #0096a6;
+    }
+
+    .btn-eliminar-confirmar {
+        background-color: #dc2626;
+        color: #ffffff !important;
+        border: none;
+        border-radius: 10px;
+        padding: 10px 22px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-eliminar-confirmar:hover {
+        background-color: #b91c1c;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+
+    .btn-volver-sigep {
+        background-color: #f8fafc;
+        color: #0f172a;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 8px 16px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+
+    .btn-volver-sigep:hover {
+        background-color: #e6f4f6;
+        color: #0096a6;
+        border-color: #0096a6;
+    }
+
+    /* CONTROLES DE FORMULARIO MODAL */
+    .form-control-sigep {
+        width: 100% !important;
+        border-radius: 12px !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 12px 16px !important;
+        font-size: 0.95rem !important;
+        background-color: #ffffff !important;
+        transition: all 0.2s ease !important;
+        resize: vertical;
+        min-height: 110px;
+    }
+
+    .form-control-sigep:focus {
+        border-color: #0096a6 !important;
+        box-shadow: 0 0 0 4px rgba(0, 150, 166, 0.15) !important;
+        outline: none !important;
+    }
+
+    /* ESTILO PROFESIONAL PARA INPUT FILE */
+    .file-input-sigep {
+        width: 100% !important;
+        border-radius: 12px !important;
+        border: 1px solid #cbd5e1 !important;
+        padding: 8px 12px !important;
+        background-color: #f8fafc !important;
+        transition: all 0.2s ease !important;
+    }
+
+    .file-input-sigep:focus {
+        border-color: #0096a6 !important;
+        box-shadow: 0 0 0 4px rgba(0, 150, 166, 0.15) !important;
+    }
+
+    .file-input-sigep::file-selector-button {
+        background-color: #0096a6;
+        color: #ffffff;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        margin-right: 14px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .file-input-sigep::file-selector-button:hover {
+        background-color: #007788;
+        box-shadow: 0 2px 8px rgba(0, 150, 166, 0.25);
+    }
+
+    /* LISTADO VERTICAL */
+    .documentos-lista {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+    }
+
+    /* CADA DOCUMENTO */
+    .doc-item-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 20px 24px;
+        margin: 0;
+        width: 100%;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+        transition: border-color 0.2s;
+    }
+
+    .doc-item-card:hover {
+        border-color: #cbd5e1;
+    }
+
+    /* NOMBRE DEL TIPO Y FECHA */
+    .doc-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .doc-type {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background-color: #e6f4f6;
+        color: #0096a6;
+        font-weight: 600;
+        padding: 8px 12px;
+        border-radius: 7px;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    .doc-type i {
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .doc-date {
+        color: #64748b;
+        font-size: 0.88rem;
+        white-space: nowrap;
+    }
+
+    /* DESCRIPCIÓN */
+    .doc-description {
+        color: #475569;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin: 0 0 12px;
+        overflow-wrap: anywhere;
+    }
+
+    /* BOTONES DE ACCIÓN */
+    .doc-item-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding-top: 13px;
+        margin-top: 4px;
+        border-top: 1px solid #e2e8f0;
+    }
+
+    .btn-action-view {
+        background-color: #0096a6;
+        color: #ffffff !important;
+        border: none;
+        border-radius: 10px;
+        padding: 9px 18px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        text-decoration: none;
+    }
+
+    .btn-action-view:hover {
+        background-color: #007788;
+        color: #ffffff !important;
+        box-shadow: 0 4px 12px rgba(0, 150, 166, 0.25);
+    }
+
+    .btn-action-delete {
+        background-color: #f8fafc;
+        color: #dc2626;
+        border: 1px solid #cbd5e1;
+        border-radius: 10px;
+        padding: 9px 18px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+
+    .btn-action-delete:hover {
+        background-color: #fee2e2;
+        border-color: #dc2626;
+        color: #b91c1c;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+        .expediente-card {
+            padding: 20px;
+        }
+
+        .expediente-encabezado {
+            align-items: flex-start !important;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .expediente-identificacion {
+            align-items: flex-start !important;
+            flex-direction: column;
+            gap: 12px !important;
+        }
+
+        .doc-item-card {
+            padding: 16px;
+        }
+
+        .doc-item-header {
+            align-items: flex-start;
+        }
+
+        .doc-item-actions {
+            gap: 10px;
+        }
+    }
+</style>
+
+<div class="container-fluid p-0">
+    <div class="expediente-card">
+
+        <!-- ENCABEZADO DE LA CARPETA -->
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom expediente-encabezado">
+
+            <div class="d-flex align-items-center gap-3 expediente-identificacion">
+
+                <a href="{% url 'estudiantes:expediente_multimedia' %}"
+                   class="btn-volver-sigep">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    Volver a Carpetas
+                </a>
+
+                <div class="expediente-datos">
+
+                    <h3 class="fw-bold" style="color: #0f172a;">
+                        <i class="fa-solid fa-folder-open text-warning me-2"></i>Carpeta de: {{ estudiante.persona.nombre }} {{ estudiante.persona.apellido }}
+                    </h3>
+
+                    <small class="text-muted">
+                        C.I: {{ estudiante.persona.cedula_persona|default:"Sin cédula" }}
+                    </small>
+
+                </div>
+            </div>
+
+            <button type="button"
+                    class="btn btn-sigep"
+                    onclick="abrirSigepModal('modalSubirMedico')">
+                <i class="fa-solid fa-camera me-2"></i>
+                Subir Expedientes Médicos
+            </button>
+
+        </div>
+
+        <!-- LISTADO VERTICAL DE DOCUMENTOS -->
+        <div class="documentos-lista">
+
+            {% for doc in archivos %}
+
+                <div class="doc-item-card">
+
+                    <!-- ICONO, TIPO Y FECHA -->
+                    <div class="doc-item-header">
+
+                        <span class="doc-type">
+
+                            {% if doc.bitacora %}
+
+                                <i class="fa-solid fa-file-lines"></i>
+                                Informe de Caracterización Pedagógica
+
+                            {% elif doc.tipo_archivo == 'foto' %}
+
+                                <i class="fa-solid fa-image"></i>
+                                {{ doc.get_tipo_archivo_display }}
+
+                            {% elif doc.tipo_archivo == 'medico' %}
+
+                                <i class="fa-solid fa-notes-medical"></i>
+                                {{ doc.get_tipo_archivo_display }}
+
+                            {% elif doc.tipo_archivo == 'informe' %}
+
+                                <i class="fa-solid fa-file-lines"></i>
+                                {{ doc.get_tipo_archivo_display }}
+
+                            {% elif doc.tipo_archivo == 'otro' %}
+
+                                <i class="fa-solid fa-file-lines"></i>
+                                {{ doc.get_tipo_archivo_display }}
+
+                            {% else %}
+
+                                <i class="fa-solid fa-file-lines"></i>
+                                {{ doc.get_tipo_archivo_display }}
+
+                            {% endif %}
+
+                        </span>
+
+                        <small class="doc-date">
+                            <i class="fa-regular fa-calendar me-1"></i>
+                            {{ doc.fecha_carga_archivo|date:"d/m/Y" }}
+                        </small>
+
+                    </div>
+
+                    <!-- DESCRIPCIÓN -->
+                    <p class="doc-description">
+                        {% if doc.perfil_general_diagnostico %}
+                            {{ doc.perfil_general_diagnostico }}
+                        {% elif doc.bitacora %}
+                            Informe psicopedagógico oficial del estudiante.
+                        {% else %}
+                            Registro oficial asociado a la carpeta digital del estudiante.
+                        {% endif %}
+                    </p>
+
+                    <!-- BOTONES DE VER Y ELIMINAR -->
+                    <div class="doc-item-actions">
+
+                        <div>
+                            {% if doc.bitacora %}
+
+                                <a href="{% url 'estudiantes:ver_bitacora' doc.bitacora.pk %}"
+                                   class="btn-action-view">
+                                    <i class="fa-solid fa-file-invoice"></i>
+                                    Ver Informe de Caracterización
+                                </a>
+
+                            {% elif doc.archivo %}
+
+                                <a href="{{ doc.archivo.url }}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   class="btn-action-view">
+
+                                    {% if doc.tipo_archivo == 'foto' %}
+                                        <i class="fa-solid fa-image"></i>
+                                        Ver Imagen
+                                    {% elif doc.archivo.name|lower|slice:"-4:" == ".pdf" %}
+                                        <i class="fa-solid fa-file-pdf"></i>
+                                        Ver Documento PDF
+                                    {% else %}
+                                        <i class="fa-solid fa-file-lines"></i>
+                                        Ver Documento
+                                    {% endif %}
+
+                                </a>
+
+                            {% else %}
+
+                                <span class="text-muted small">
+                                    <i class="fa-regular fa-file me-1"></i>
+                                    Sin archivo adjunto
+                                </span>
+
+                            {% endif %}
+                        </div>
+
+                        <button type="button"
+                                class="btn-action-delete"
+                                title="Eliminar documento"
+                                onclick="abrirModalEliminar('{{ doc.pk }}', '{{ doc.nombre_archivo|escapejs }}')">
+                            <i class="fa-solid fa-trash"></i>
+                            Eliminar
+                        </button>
+
+                    </div>
+
+                </div>
+
+            {% empty %}
+
+                <div class="text-center py-5 text-muted">
+                    <i class="fa-regular fa-folder-open mb-2 d-block"
+                       style="font-size: 3rem;"></i>
+                    No hay documentos o informes registrados en esta carpeta.
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+</div>
+
+<!-- MODAL PARA SUBIR DOCUMENTOS -->
+<div class="sigep-modal-overlay" id="modalSubirMedico">
+
+    <div class="sigep-modal-content">
+
+        <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-4">
+
+            <h5 class="fw-bold m-0" style="color: #0f172a; font-size: 1.25rem;">
+                <i class="fa-solid fa-file-medical me-2" style="color: #0096a6;"></i>
+                Subir Expediente Médico / Foto
+            </h5>
+
+            <button type="button"
+                    class="btn-close"
+                    aria-label="Cerrar"
+                    onclick="cerrarSigepModal('modalSubirMedico')">
+            </button>
+
+        </div>
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <input type="hidden" name="accion" value="subir_medico">
+            <input type="hidden" name="nombre_archivo" value="Expediente Médico / Registro">
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold small text-dark mb-2">
+                    Seleccionar Imagen o Archivo del Expediente Físico
+                </label>
+
+                <input type="file"
+                       name="archivo"
+                       class="form-control file-input-sigep"
+                       accept="image/*,.pdf"
+                       required>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold small text-dark mb-2">
+                    Observaciones o Descripción del Registro
+                </label>
+
+                <textarea name="perfil_general_diagnostico"
+                          class="form-control form-control-sigep"
+                          rows="4"
+                          placeholder="Escribe aquí los detalles, observaciones o diagnóstico médico referente..."
+                          required></textarea>
+            </div>
+
+            <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+
+                <button type="button"
+                        class="btn btn-cancelar-sigep"
+                        onclick="cerrarSigepModal('modalSubirMedico')">
+                    Cancelar
+                </button>
+
+                <button type="submit" class="btn btn-sigep">
+                    <i class="fa-solid fa-floppy-disk me-1"></i>
+                    Guardar en Carpeta
+                </button>
+
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<!-- MODAL PARA ELIMINAR DOCUMENTOS -->
+<div class="sigep-modal-overlay" id="modalEliminarDoc">
+
+    <div class="sigep-modal-content" style="max-width: 520px;">
+
+        <div class="d-flex justify-content-between align-items-center pb-3 border-bottom mb-3">
+
+            <h5 class="fw-bold text-danger m-0" style="font-size: 1.2rem;">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i>
+                Eliminar Registro
+            </h5>
+
+            <button type="button"
+                    class="btn-close"
+                    aria-label="Cerrar"
+                    onclick="cerrarSigepModal('modalEliminarDoc')">
+            </button>
+
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <input type="hidden" name="accion" value="eliminar_archivo">
+            <input type="hidden" name="archivo_id" id="delete_archivo_id">
+
+            <p class="text-muted my-4" style="font-size: 1rem;">
+                ¿Estás seguro de eliminar el registro
+                <strong id="delete_nombre_archivo" class="text-dark"></strong>?
+            </p>
+
+            <div class="d-flex justify-content-end gap-3 pt-3 border-top">
+
+                <button type="button"
+                        class="btn btn-cancelar-sigep"
+                        onclick="cerrarSigepModal('modalEliminarDoc')">
+                    Cancelar
+                </button>
+
+                <button type="submit" class="btn btn-eliminar-confirmar">
+                    <i class="fa-solid fa-trash me-1"></i>
+                    Sí, Eliminar
+                </button>
+
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<script>
+    function abrirSigepModal(id) {
+        const modal = document.getElementById(id);
+
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+
+    function cerrarSigepModal(id) {
+        const modal = document.getElementById(id);
+
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+
+    function abrirModalEliminar(id, nombre) {
+        document.getElementById('delete_archivo_id').value = id;
+        document.getElementById('delete_nombre_archivo').innerText = nombre;
+
+        abrirModalEliminarDoc('modalEliminarDoc');
+    }
+
+    function abrirModalEliminarDoc(id) {
+        const modal = document.getElementById(id);
+        if (modal) {
+            modal.style.display = 'flex';
+        }
+    }
+
+    window.addEventListener('click', function(event) {
+        if (event.target.classList.contains('sigep-modal-overlay')) {
+            event.target.style.display = 'none';
+        }
+    });
+
+    window.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            document.querySelectorAll('.sigep-modal-overlay').forEach(function(modal) {
+                modal.style.display = 'none';
+            });
+        }
+    });
+</script>
+
+{% endblock %}

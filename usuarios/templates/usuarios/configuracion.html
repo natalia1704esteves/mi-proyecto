@@ -1,0 +1,364 @@
+{% extends 'usuarios/base_dashboard.html' %}
+
+{% block title %}Configuración de Cuenta - SIGEP{% endblock %}
+
+{% block content %}
+<style>
+    /* Header superior de navegación dentro de la vista de configuración */
+    .settings-top-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .btn-back-home {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #ffffff;
+        color: var(--text-main);
+        text-decoration: none;
+        padding: 10px 18px;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+        transition: all 0.2s ease;
+    }
+
+    .btn-back-home:hover {
+        background: var(--primary);
+        color: #ffffff;
+        border-color: var(--primary);
+    }
+
+    /* Layout principal */
+    .settings-card {
+        background: #ffffff;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        border: 1px solid var(--border-color);
+        display: flex;
+        min-height: 580px;
+        overflow: hidden;
+    }
+
+    /* Menú Lateral Izquierdo */
+    .settings-sidebar {
+        width: 280px;
+        background: #fafafa;
+        border-right: 1px solid var(--border-color);
+        padding: 30px 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .user-profile-header {
+        text-align: center;
+        padding: 0 20px 25px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        margin-bottom: 20px;
+    }
+
+    .avatar-large {
+        width: 85px;
+        height: 85px;
+        background: #e6f4f6;
+        color: var(--primary);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        margin: 0 auto 12px auto;
+        border: 3px solid #ffffff;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .user-profile-header h3 {
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--text-main);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .user-profile-header p {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 2px;
+    }
+
+    /* Navegación por pestañas */
+    .nav-tabs-settings {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        padding: 0 15px;
+    }
+
+    .tab-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 18px;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 13.5px;
+        font-weight: 500;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: none;
+        background: transparent;
+        width: 100%;
+        text-align: left;
+    }
+
+    .tab-link:hover {
+        background: #f1f5f9;
+        color: var(--text-main);
+    }
+
+    .tab-link.active {
+        background: #ffffff;
+        color: var(--primary);
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        border-left: 4px solid var(--primary);
+    }
+
+    /* Áreas de Contenido */
+    .settings-content {
+        flex: 1;
+        padding: 40px;
+    }
+
+    .tab-pane {
+        display: none;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+
+    .tab-pane h2 {
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 25px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-group-full {
+        grid-column: span 2;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-control-settings {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background: #fafafa;
+        font-size: 14px;
+        transition: 0.2s;
+        box-sizing: border-box;
+    }
+
+    /* Estilo para campos no editables */
+    .form-control-settings.readonly-field {
+        background: #f1f5f9;
+        color: #64748b;
+        cursor: not-allowed;
+        border-color: #e2e8f0;
+    }
+
+    .form-control-settings:focus:not(.readonly-field) {
+        background: #fff;
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 150, 166, 0.1);
+    }
+
+    .btn-save {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: 0.2s;
+    }
+
+    .btn-save:hover {
+        background: var(--primary-dark);
+    }
+</style>
+
+<!-- Barra superior con botón de retorno -->
+<div class="settings-top-nav">
+    <a href="{% url 'home' %}" class="btn-back-home" title="Volver al Inicio">
+        <i class="fa-solid fa-house"></i> Volver al Inicio
+    </a>
+</div>
+
+<div class="settings-card">
+    <!-- Menú Lateral -->
+    <aside class="settings-sidebar">
+        <div class="user-profile-header">
+            <div class="avatar-large">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <h3>{{ persona.nombre|default:request.user.first_name }} {{ persona.apellido|default:request.user.last_name }}</h3>
+            <p>{{ request.user.rol.nombre_rol }}</p>
+        </div>
+
+        <nav class="nav-tabs-settings">
+            <button class="tab-link active" onclick="openTab(event, 'perfil')">
+                <i class="fa-solid fa-id-card"></i> Mi Perfil
+            </button>
+            
+            <button class="tab-link" onclick="openTab(event, 'seguridad')">
+                <i class="fa-solid fa-lock"></i> Seguridad
+            </button>
+
+            <!-- Pestaña exclusiva para ADMINISTRADORES -->
+            {% if request.user.rol.nombre_rol == 'Administrador' or request.user.is_superuser %}
+            <button class="tab-link" onclick="openTab(event, 'registro')">
+                <i class="fa-solid fa-user-plus"></i> Registrar Usuario
+            </button>
+            {% endif %}
+        </nav>
+    </aside>
+
+    <!-- Contenido Principal -->
+    <main class="settings-content">
+        
+        <!-- Pestaña 1: Mi Perfil -->
+        <div id="perfil" class="tab-pane active">
+            <h2>Mi Perfil</h2>
+            <form method="POST" action="#">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="info-text" style="font-weight:600;">Nombre</label>
+                        <input type="text" class="form-control-settings" value="{{ request.user.persona.nombre|default:request.user.first_name }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="info-text" style="font-weight:600;">Apellido</label>
+                        <input type="text" class="form-control-settings" value="{{ request.user.persona.apellido|default:request.user.last_name }}">
+                    </div>
+
+                    <div class="form-group form-group-full">
+                        <label class="info-text" style="font-weight:600; display:block; margin-bottom:6px;">Correo Electrónico</label>
+                        <input type="email" class="form-control-settings" name="email" value="{{ request.user.email }}">
+                    </div>
+                </div>
+                <button type="submit" class="btn-save">Guardar Cambios</button>
+            </form>
+        </div>
+
+        <!-- Pestaña 2: Seguridad / Cambiar Contraseña -->
+        <div id="seguridad" class="tab-pane">
+            <h2>Cambiar Contraseña</h2>
+            <form method="POST" action="#">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="form-group form-group-full">
+                        <label class="info-text" style="font-weight:600; display:block; margin-bottom:6px;">Contraseña Actual</label>
+                        <input type="password" class="form-control-settings" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label class="info-text" style="font-weight:600; display:block; margin-bottom:6px;">Nueva Contraseña</label>
+                        <input type="password" class="form-control-settings" placeholder="••••••••">
+                    </div>
+                    <div class="form-group">
+                        <label class="info-text" style="font-weight:600; display:block; margin-bottom:6px;">Confirmar Nueva Contraseña</label>
+                        <input type="password" class="form-control-settings" placeholder="••••••••">
+                    </div>
+                </div>
+                <button type="submit" class="btn-save">Actualizar Contraseña</button>
+            </form>
+        </div>
+
+        <!-- Pestaña 3: Registrar Usuario (SOLO ADMIN) -->
+        {% if request.user.rol.nombre_rol == 'Administrador' or request.user.is_superuser %}
+        <div id="registro" class="tab-pane">
+            <h2>Registrar Nuevo Usuario</h2>
+            <p class="text-muted" style="margin-bottom: 20px;">Crea el acceso inicial para docentes, psicopedagogos o personal administrativo.</p>
+            
+            <form method="POST" action="{% url 'registro' %}">
+                {% csrf_token %}
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="cedula" class="info-text" style="font-weight:600;">Cédula de Identidad</label>
+                        <input type="text" name="cedula" id="cedula" class="form-control-settings" placeholder="Ej: 12345678" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre" class="info-text" style="font-weight:600;">Nombre</label>
+                        <input type="text" name="nombre" id="nombre" class="form-control-settings" placeholder="Ej: Juan" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="apellido" class="info-text" style="font-weight:600;">Apellido</label>
+                        <input type="text" name="apellido" id="apellido" class="form-control-settings" placeholder="Ej: Pérez" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email" class="info-text" style="font-weight:600;">Correo Electrónico</label>
+                        <input type="email" name="email" id="email" class="form-control-settings" placeholder="correo@ejemplo.com" required>
+                    </div>
+                    <div class="form-group form-group-full">
+                        <label for="rol" class="info-text" style="font-weight:600;">Rol del Usuario</label>
+                        <select name="rol" id="rol" class="form-control-settings" required>
+                            <option value="" disabled selected>Seleccione un rol...</option>
+                            {% for rol in roles %}
+                                <option value="{{ rol.id_rol }}">{{ rol.nombre_rol }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-save">Registrar Usuario</button>
+            </form>
+        </div>
+        {% endif %}
+
+    </main>
+</div>
+
+<!-- Script interactivo para cambiar entre pestañas -->
+<script>
+    function openTab(evt, tabName) {
+        var i, tabcontent, tablinks;
+        
+        tabcontent = document.getElementsByClassName("tab-pane");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].classList.remove("active");
+        }
+
+        tablinks = document.getElementsByClassName("tab-link");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+    }
+</script>
+{% endblock %}

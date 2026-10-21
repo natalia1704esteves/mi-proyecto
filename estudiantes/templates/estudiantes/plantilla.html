@@ -1,0 +1,275 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{% if solo_lectura %}Ver Informe{% elif editando %}Editar Informe{% else %}Redactar Informe{% endif %} - SIGEP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: 'Times New Roman', Times, serif; background-color: #525252; padding: 20px; color: #000; }
+        .sheet { max-width: 850px; margin: 0 auto; background: #ffffff; padding: 40px; box-shadow: 0 0 15px rgba(0,0,0,0.3); border: 1px solid #ccc; }
+        
+        /* Membrete Oficial */
+        .header-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+        .header-table td { text-align: center; vertical-align: middle; font-size: 13px; font-weight: bold; line-height: 1.3; }
+        
+        .title-doc { text-align: center; font-size: 15px; font-weight: bold; margin: 15px 0 5px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        /* Fecha alineada a la derecha */
+        .fecha-container { display: flex; justify-content: flex-end; align-items: center; margin-bottom: 15px; font-size: 13px; font-weight: bold; gap: 8px; }
+        .fecha-container input { padding: 4px 8px; border: 1px solid #000; font-family: 'Times New Roman', Times, serif; font-size: 13px; width: 150px; }
+
+        /* Estilos de Secciones estilo Formulario Oficial */
+        .section-title { background-color: #e9ecef; font-weight: bold; font-size: 12px; padding: 5px 8px; border: 1px solid #000; margin-top: 15px; text-transform: uppercase; }
+        .section-content { border: 1px solid #000; border-top: none; padding: 10px; background: #fff; }
+        
+        .sheet textarea, .sheet input[type="text"], .sheet input[type="date"] { 
+            width: 100%; 
+            padding: 8px; 
+            border: 1px solid #000; 
+            font-family: 'Times New Roman', Times, serif; 
+            font-size: 14px; 
+            box-sizing: border-box; 
+            background: #fff; 
+        }
+        .sheet textarea { min-height: 110px; resize: vertical; }
+        .sheet textarea:focus, .sheet input:focus { outline: none; border-color: #000; }
+        
+        /* Campos de solo lectura */
+        .sheet input[readonly], .sheet textarea[readonly] { 
+            background-color: #f8f9fa; 
+            cursor: default; 
+            border: none;
+        }
+
+        /* Sección de Firmas Oficiales */
+        .signatures-table { 
+            width: 100%; 
+            margin-top: 60px; 
+            margin-bottom: 20px;
+            border-collapse: collapse; 
+            text-align: center; 
+        }
+        .signatures-table td { 
+            width: 33.33%; 
+            padding: 0 15px; 
+            font-size: 12px; 
+            font-weight: bold; 
+            vertical-align: bottom;
+        }
+        .signature-line {
+            border-top: 1px solid #000;
+            margin-bottom: 5px;
+        }
+
+        /* BARRA SUPERIOR DE NAVEGACIÓN */
+        .header-bar-no-print { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            max-width: 890px;
+            margin: 0 auto 20px; 
+            background: #f8f9fa; 
+            padding: 10px 20px; 
+            border-radius: 6px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        }
+        .btn-regresar-top { 
+            background-color: #6c757d; 
+            color: white; 
+            padding: 8px 15px; 
+            border-radius: 4px; 
+            text-decoration: none; 
+            font-weight: bold; 
+            font-family: sans-serif; 
+            font-size: 14px; 
+        }
+        .btn-regresar-top:hover {
+            background-color: #5a6268;
+            color: white;
+        }
+
+        .btn-guardar { background-color: #198754; color: white; border: none; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; font-family: sans-serif; font-size: 14px; }
+        .btn-descargar { background-color: #2b6cb0; color: white; border: none; padding: 8px 20px; border-radius: 4px; font-weight: bold; cursor: pointer; font-family: sans-serif; font-size: 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }
+        
+        @media print {
+            body { background: none; padding: 0; }
+            .sheet { border: none; box-shadow: none; padding: 0; }
+            .no-print { display: none !important; }
+            .sheet textarea { border: none; background: transparent; resize: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA SUPERIOR DE NAVEGACIÓN (FUERA DE IMPRESIÓN) -->
+    <div class="header-bar-no-print no-print">
+        <a href="{% url 'estudiantes:listar_bitacoras' %}" class="btn-regresar-top">
+            <i class="fa-solid fa-arrow-left"></i> Volver
+        </a>
+        <h3 style="margin: 0; font-family: sans-serif; color: #333; font-size: 1.25rem;">
+            {% if solo_lectura %}Visualizando Informe Oficial{% elif editando %}Editando Registro Oficial{% else %}Redactando Registro Oficial{% endif %}
+        </h3>
+    </div>
+
+    <div class="sheet">
+        <!-- Membrete institucional -->
+        <table class="header-table">
+            <tr>
+                <td style="width: 15%; text-align: left;"><i class="fa-solid fa-graduation-cap" style="font-size: 40px;"></i></td>
+                <td style="width: 70%;">
+                    UNIDAD EDUCATIVA "RAFAEL ARÉVALO GONZÁLEZ"<br>
+                    Unidad Psicoeducativa "R.A.G." - Educación Especial<br>
+                    Municipio Páez - Estado Miranda
+                </td>
+                <td style="width: 15%; text-align: right;"><i class="fa-solid fa-school" style="font-size: 40px;"></i></td>
+            </tr>
+        </table>
+
+        <!-- Título dinámico -->
+        <div class="title-doc">
+            {% if tipo_informe == 'compromiso' %}
+                CARTA COMPROMISO DE PADRES O REPRESENTANTES
+            {% elif tipo_informe == 'final' %}
+                INFORME EDUCATIVO FINAL
+            {% else %}
+                INFORME EDUCATIVO INTEGRAL
+            {% endif %}
+        </div>
+
+        <!-- Fecha alineada a la derecha -->
+        <div class="fecha-container">
+            <span>Fecha:</span>
+            {% if solo_lectura %}
+                <span style="border-bottom: 1px solid #000; min-width: 120px; text-align: center; display: inline-block;">{{ bitacora.fecha_creacion|date:"d/m/Y"|default:"dd/mm/aaaa" }}</span>
+            {% else %}
+                <input type="date" name="fecha" value="{{ bitacora.fecha_creacion|date:'Y-m-d' }}">
+            {% endif %}
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            
+            <!-- DATOS DE IDENTIFICACIÓN -->
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid #000; font-size: 14px; margin-bottom: 15px;">
+                <tr>
+                    <td colspan="3" style="border: 1px solid #000; padding: 5px; background-color: #e9ecef; font-weight: bold;">DATOS DE IDENTIFICACIÓN</td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="border: 1px solid #000; padding: 5px; width: 70%;">
+                        <strong>APELLIDOS Y NOMBRES DEL ESTUDIANTE:</strong><br>
+                        {{ estudiante.persona.apellido }} {{ estudiante.persona.nombre }}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 5px; width: 30%;">
+                        <strong>CÉDULA:</strong><br>
+                        {{ estudiante.persona.cedula_persona|default:"N/D" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #000; padding: 5px; width: 45%;">
+                        <strong>FECHA DE NACIMIENTO:</strong><br>
+                        {{ estudiante.persona.fecha_nacimiento|date:"F j, Y" }}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 5px; width: 25%;">
+                        <strong>EDAD:</strong><br>
+                        {% if solo_lectura %}
+                            {{ bitacora.edad|default:"N/D" }} años
+                        {% else %}
+                            <input type="text" name="edad" value="{{ bitacora.edad|default:'' }}" style="padding: 2px; font-size: 13px;">
+                        {% endif %}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 5px; width: 30%;">
+                        <strong>SEXO:</strong><br>
+                        {{ estudiante.persona.sexo|default:"N/D" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="border: 1px solid #000; padding: 5px;">
+                        <strong>PADRE / REPRESENTANTE:</strong><br>
+                        {% if estudiante.representante %}
+                            {{ estudiante.representante.persona.nombre }} {{ estudiante.representante.persona.apellido }}
+                        {% else %}
+                            No asignado
+                        {% endif %}
+                    </td>
+                    <td style="border: 1px solid #000; padding: 5px;">
+                        <strong>TELÉFONO:</strong><br>
+                        {{ estudiante.representante.persona.telefono|default:"N/D" }}
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" style="border: 1px solid #000; padding: 5px;">
+                        <strong>DOMICILIO:</strong><br>
+                        {% if estudiante.representante %}
+                            Parroquia {{ estudiante.representante.parroquia|default:"N/D" }}, Municipio {{ estudiante.representante.municipio|default:"Páez" }}, Estado Miranda
+                        {% else %}
+                            Dirección no especificada , Municipio Páez , Estado Miranda
+                        {% endif %}
+                    </td>
+                </tr>
+            </table>
+
+            <!-- BLOQUE 1: CARACTERIZACIÓN PEDAGÓGICA-SOCIAL / MOTIVO DE CONSULTA -->
+            <div class="section-title">CARACTERIZACIÓN PEDAGÓGICA-SOCIAL / MOTIVO DE CONSULTA</div>
+            <div class="section-content">
+                {% if solo_lectura %}
+                    <div style="min-height: 90px; white-space: pre-wrap;">{{ bitacora.motivo_consulta|default:"Describa aquí..." }}</div>
+                {% else %}
+                    <textarea name="motivo_consulta" rows="4">{% if bitacora.motivo_consulta %}{{ bitacora.motivo_consulta }}{% endif %}</textarea>
+                {% endif %}
+            </div>
+
+            <!-- BLOQUE 2: OBSERVACIONES / DESARROLLO -->
+            <div class="section-title">OBSERVACIONES Y DESARROLLO DEL INFORME</div>
+            <div class="section-content">
+                {% if solo_lectura %}
+                    <div style="min-height: 110px; white-space: pre-wrap;">{{ bitacora.observaciones_generales|default:"Detalle las observaciones..." }}</div>
+                {% else %}
+                   <textarea name="observaciones_generales" rows="5">{% if bitacora.observaciones_generales %}{{ bitacora.observaciones_generales }}{% endif %}</textarea>
+                {% endif %}
+            </div>
+
+            <!-- BLOQUE 3: RECOMENDACIONES -->
+            <div class="section-title">RECOMENDACIONES / ACUERDOS</div>
+            <div class="section-content">
+                {% if solo_lectura %}
+                    <div style="min-height: 90px; white-space: pre-wrap;">{{ bitacora.recomendaciones|default:"Escriba las recomendaciones..." }}</div>
+                {% else %}
+                    <textarea name="recomendaciones" rows="4">{% if bitacora.recomendaciones %}{{ bitacora.recomendaciones }}{% endif %}</textarea>
+                {% endif %}
+            </div>
+
+            <!-- SECCIÓN DE FIRMAS OFICIALES -->
+            <table class="signatures-table">
+                <tr>
+                    <td>
+                        <div class="signature-line"></div>
+                        DOCENTE ESPECIALISTA
+                    </td>
+                    <td>
+                        <div class="signature-line"></div>
+                        SUBDIRECTORA U.P.E.
+                    </td>
+                    <td>
+                        <div class="signature-line"></div>
+                        DIRECTOR DEL PLANTEL
+                    </td>
+                </tr>
+            </table>
+
+            <!-- Botones de Acción -->
+            <div style="margin-top: 30px; text-align: right;" class="no-print">
+                {% if solo_lectura %}
+                    <button type="button" onclick="window.print();" class="btn-descargar">
+                        <i class="fa-solid fa-download"></i> Descargar / Imprimir Informe
+                    </button>
+                {% else %}
+                    <button type="submit" class="btn-guardar">
+                        <i class="fa-solid fa-floppy-disk"></i> {% if editando %}Guardar Cambios{% else %}Guardar Informe Oficial{% endif %}
+                    </button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</body>
+</html>
